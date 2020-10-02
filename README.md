@@ -1,2 +1,1 @@
-# clustering
-Clustering with Iteratively Reweighted Descent
+# Clustering with Iteratively Reweighted Descent
