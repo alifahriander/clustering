@@ -21,10 +21,23 @@ Observation::Observation(VectorXd mean_vector, VectorXd variance_vector, unsigne
     // cout << "Assignment Vector: " << endl << assignments << endl;
 }
 
+/*
+* Draw sample from normal distribution
+* @param mean
+* @param variance
+* @return sample 
+*/
 double Observation::normalDistribution(double mean, double variance){
     normal_distribution<double> distribution(mean, variance);
     return distribution(generator_observation);
 }
+
+/*
+* Draw sample from normal distribution
+* @param mean
+* @param variance
+* @return sample 
+*/
 unsigned int Observation::uniformDistribution(unsigned int min, unsigned int max){
     uniform_int_distribution<unsigned int> distrib(min, max); 
     return distrib(generator_observation);

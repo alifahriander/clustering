@@ -4,6 +4,7 @@
 #include <eigen3/Eigen/Core>
 #include <iostream>
 #include <random>
+#include "Observation.h"
 
 using namespace std;
 using namespace Eigen;
@@ -43,12 +44,15 @@ class Data{
 
         default_random_engine generator_data;
     
-        Data(VectorXd x_true, VectorXd y_observed, double r, double s, double initX, unsigned random_seed);
+        Data(Observation inputObservation, double r_x, double r_z, unsigned random_seed);
         void updateW(MatrixXd& W,VectorXd s, double r);
         void updateData();
         double normalDistribution(double mean, double variance);
-
+        double uniformDistribution(double min, double max);
+        void printData();
+        void saveData();
+        int VectorToCSV(const MatrixXd& inputMatrix, const string& fileName, const streamsize dPrec);
 
 };
 
-#endif //DATA_H
+#endif

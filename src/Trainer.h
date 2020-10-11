@@ -8,8 +8,8 @@
 using namespace std;
 using namespace Eigen;
 
-#define IRGD    True
-#define IRCD    False
+#define IRGD    true
+#define IRCD    false
 
 #define SNUV    0
 #define HUBER   1

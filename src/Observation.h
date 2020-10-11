@@ -28,4 +28,4 @@ class Observation{
         unsigned int uniformDistribution(unsigned int min, unsigned int max);
 
 };
-#endif // Observation_h
+#endif 
