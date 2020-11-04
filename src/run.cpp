@@ -66,7 +66,9 @@ void readCSV(string path, double &r_x, double &r_z, double &clusterVariance1, do
 
 int main(){
     //Input parameters
-    string path = "/home/ander/Documents/git/clustering/inputConfig.txt";
+    // string path = "/home/ander/Documents/git/clustering/inputConfig.txt";
+    string path = "inputConfig.txt";
+
     double r_x, r_z, clusterVariance1, clusterVariance2, clusterCenter1, clusterCenter2, beta;
     readCSV(path, r_x, r_z, clusterVariance1, clusterVariance2, clusterCenter1, clusterCenter2, beta);
     
@@ -93,7 +95,9 @@ int main(){
 
     //Create config.csv 
     ofstream configData;
-    configData.open("/home/ander/Documents/git/clustering/config.csv",ios::app);
+    // configData.open("/home/ander/Documents/git/clustering/config.csv",ios::app);
+    configData.open("config.csv",ios::app);
+
     configData << "learning_rate" << "," << learning_rate << endl;
     configData << "numberOfIterations" << "," << numberOfIterations << endl;
     configData << "tolerance" << "," << tolerance << endl;
