@@ -1,9 +1,13 @@
 #include <fstream>
+#include <cmath>
 #include "Data.h"
 #include "assert.h"
+#include "Trainer.h"
 
-Data::Data(Observation inputObservation, double R_x, double R_z, unsigned random_seed){
+Data::Data(Observation inputObservation, double R_x, double R_z, unsigned random_seed, double inputBeta){
     generator_data.seed(random_seed);
+
+    beta = inputBeta;
     // Get numbers of clusters and samples 
     x_true = inputObservation.x;
     y_observed = inputObservation.y;
@@ -69,7 +73,7 @@ Data::Data(Observation inputObservation, double R_x, double R_z, unsigned random
     z = A*x_estimate - y;
 
     // Data::printData(); 
-    Data::saveData();
+    Data::saveData(true);
    
 
 }
@@ -85,6 +89,35 @@ void Data::updateW(MatrixXd& W,VectorXd s, double r){
     sumVariance = sumVariance.array().inverse();
     W = sumVariance.asDiagonal();
 }
+
+void Data::updateCost(VectorXd v, double r, int mode, double& cost){
+    double accumulatedCost = 0.0;
+
+    if(mode==SNUV){
+        for(unsigned int i=0; i<v.size(); i++){
+            if(v(i)*v(i) < r*r) accumulatedCost += (v(i)*v(i) /(2*r*r)) + log(r);
+            else accumulatedCost += log(abs(v(i))) + 0.5;
+        }
+
+    }
+    else if(mode == HUBER){
+        for(unsigned int i=0; i<numberClusters; ++i){
+            if(x_estimate(i)<beta*r_x*r_x) accumulatedCost += x_estimate(i)*x_estimate(i)/(2*r_x*r_x);
+            else accumulatedCost += beta * abs(x_estimate(i)) - beta*beta *r_x*r_x/2.0;
+        }
+    }
+    else if(mode == L1){
+        for(unsigned int i=0; i<numberClusters; ++i){
+            accumulatedCost += abs(beta*x_estimate(i));  
+        }
+    }
+    cost = accumulatedCost;
+
+
+
+}
+
+
 
 
 /*
@@ -116,8 +149,9 @@ void Data::printData(){
 void Data::updateData(){
     Data::updateW(W_x, s_x, r_x);
     Data::updateW(W_z, s_z, r_z);
+    //TODO: Add updateCost
     // Data::printData();
-    Data::saveData();
+    Data::saveData(false);
 }
 
 
@@ -142,9 +176,25 @@ int Data::VectorToCSV(const MatrixXd& inputMatrix, const string& fileName, const
 		return -1;
 	return 0;
 }
+int Data::VectorToCSV(const double Scalar, const string& fileName, const streamsize dPrec){
+
+	ofstream outputData;
+    // Always appends
+	outputData.open(fileName, ios::app);
+	if (!outputData)
+		return -1;
+	outputData.precision(dPrec);
+    outputData << Scalar;
+    outputData << endl;
+	outputData.close();
+
+	if (!outputData)
+		return -1;
+	return 0;
+}
 
 
-void Data::saveData(){
+void Data::saveData(bool init){
     int success = Data::VectorToCSV(x_estimate,"/home/ander/Documents/git/clustering/x_estimate.csv", 4);
     if(success != 0) cout<<"Vector couldn't be saved!"<<endl;
     success = Data::VectorToCSV(s_x,"/home/ander/Documents/git/clustering/s_x.csv", 4);
@@ -153,6 +203,11 @@ void Data::saveData(){
     if(success != 0) cout<<"Vector couldn't be saved!"<<endl;
     success = Data::VectorToCSV(z,"/home/ander/Documents/git/clustering/z.csv", 4);
     if(success != 0) cout<<"Vector couldn't be saved!"<<endl;
-
+    if(!init){
+    success = Data::VectorToCSV(costX,"/home/ander/Documents/git/clustering/costX.csv", 10);
+    if(success != 0) cout<<"Vector couldn't be saved!"<<endl;
+    success = Data::VectorToCSV(costZ,"/home/ander/Documents/git/clustering/costZ.csv", 10);
+    if(success != 0) cout<<"Vector couldn't be saved!"<<endl;
+    }
 }
 

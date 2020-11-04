@@ -33,25 +33,33 @@ class Data{
         VectorXd y;
 
         // z = Ax - y
-        MatrixXd z;
+        VectorXd z;
 
         // SNUV parameters 
         double r_x;
         double r_z;
 
+        double beta;
+
         VectorXd s_x;
         VectorXd s_z;
 
+        double costX;
+        double costZ;
+
         default_random_engine generator_data;
     
-        Data(Observation inputObservation, double r_x, double r_z, unsigned random_seed);
+        Data(Observation inputObservation, double r_x, double r_z, unsigned random_seed, double beta);
         void updateW(MatrixXd& W,VectorXd s, double r);
         void updateData();
+        void updateCost(VectorXd v, double r, int mode, double& cost);
         double normalDistribution(double mean, double variance);
         double uniformDistribution(double min, double max);
         void printData();
-        void saveData();
+        void saveData(bool init);
         int VectorToCSV(const MatrixXd& inputMatrix, const string& fileName, const streamsize dPrec);
+        int VectorToCSV(double Scalar, const string& fileName, const streamsize dPrec);
+
 
 };
 

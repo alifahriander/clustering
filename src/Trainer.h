@@ -23,18 +23,22 @@ class Trainer{
         VectorXd gradient;
         bool mode;
         unsigned int numberIterations;
-        unsigned int prior;
+        unsigned int priorX;
+        unsigned int priorZ;
         double learningRate;
         double tol;
         VectorXd stateX;
 
 
-        Trainer(bool mode, unsigned int prior, double learningRate, unsigned int numberIterations, double tol);
+        Trainer(bool mode, unsigned int priorX, unsigned int priorZ, double learningRate, unsigned int numberIterations, double tol);
         void setStateX(Data data);
         void computeGradient(Data data);
         void updateX(Data& data);
-        void updateS(Data& data);
+        void updateSx(Data& data);
+        void updateSz(Data& data);
+
         void train(Data& data);
+        // int VectorToCSV(const MatrixXd& inputMatrix, const string& fileName, const streamsize dPrec);
 
 };
 #endif

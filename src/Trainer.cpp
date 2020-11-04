@@ -1,12 +1,15 @@
+#include <fstream>
 #include "Trainer.h"
 #include "Data.h"
 
 using namespace std;
 using namespace Eigen;
 
-Trainer::Trainer(bool inputMode, unsigned int inputPrior, double inputLearningRate, unsigned int inputNumberInterations, double inputTol){
+Trainer::Trainer(bool inputMode, unsigned int inputPriorX,unsigned int inputPriorZ, double inputLearningRate, unsigned int inputNumberInterations, double inputTol){
     Trainer::mode = inputMode;
-    Trainer::prior = inputPrior;
+    Trainer::priorX = inputPriorX;
+    Trainer::priorZ = inputPriorZ;
+
     Trainer::learningRate = inputLearningRate;
     Trainer::numberIterations = inputNumberInterations;
     Trainer::tol = inputTol;
@@ -52,16 +55,31 @@ void Trainer::updateX(Data& data){
 /**
  * Update s according to the rule in 14.25 in Lecture Notes
  * */
-void Trainer::updateS(Data& data){
+void Trainer::updateSx(Data& data){
 
-    if(Trainer::prior == SNUV){
+    if(Trainer::priorX == SNUV){
         VectorXd diffX = data.x_estimate.array().pow(2);
         diffX -= data.r_x * data.r_x * VectorXd::Constant(data.numberClusters,1.0);
         for(unsigned int i=0; i<data.numberClusters; ++i){
             if(diffX(i) < 0.0) data.s_x(i) = 0;
             else data.s_x(i) = diffX(i);
         }
+    }
+    else if(Trainer::priorX == HUBER){
+        for(unsigned int i=0; i<data.numberClusters; ++i){
+            if(data.x_estimate(i)<data.beta*data.r_x*data.r_x) data.s_x(i) = 0.0;
+            else data.s_x(i) = sqrt((abs(data.x_estimate(i))/data.beta) - (data.r_x*data.r_x));
+        }
+    }
+    else if(Trainer::priorX == L1){
+        for(unsigned int i=0; i<data.numberClusters; ++i){
+            data.s_x(i) = sqrt(abs(data.x_estimate(i)/data.beta));
+        }
+    }
 
+}
+void Trainer::updateSz(Data& data){
+    if(Trainer::priorZ == SNUV){
         VectorXd diffZ = data.z.array().pow(2);
         diffZ -= data.r_z * data.r_z * VectorXd::Constant(data.numberClusters*data.numberSamples,1.0);
 
@@ -69,13 +87,7 @@ void Trainer::updateS(Data& data){
             if(diffZ(i) < 0.0) data.s_z(i) = 0;
             else data.s_z(i) = diffZ(i);
         }
-        data.updateData();
-
-        // cout << "Difference Vector X "<< endl << diffX << endl;
-        // cout << "Difference Vector Z  "<< endl << diffZ << endl;
-
     }
-
 }
 
 /**
@@ -87,7 +99,12 @@ void Trainer::train(Data& data){
             Trainer::setStateX(data);
             Trainer::computeGradient(data);
             Trainer::updateX(data);
-            Trainer::updateS(data);
+            Trainer::updateSx(data);
+            Trainer::updateSz(data);
+            data.updateCost(data.x_estimate,data.r_x,Trainer::priorX,data.costX);
+            data.updateCost(data.z,data.r_z,Trainer::priorZ,data.costZ);
+
+            data.updateData();
             cout << " Iteration: "<< counter << "\tDifference: "<< (stateX-data.x_estimate).norm() << endl;
 
             if((stateX-data.x_estimate).norm() < Trainer::tol){
@@ -100,7 +117,11 @@ void Trainer::train(Data& data){
         for(unsigned int counter=0; counter<Trainer::numberIterations; counter++){
             Trainer::setStateX(data);
             Trainer::updateX(data);
-            Trainer::updateS(data);
+            Trainer::updateSx(data);
+            Trainer::updateSz(data);
+            data.updateCost(data.x_estimate,data.r_x,Trainer::priorX,data.costX);
+            data.updateCost(data.z,data.r_z,Trainer::priorZ,data.costZ);
+            data.updateData();            
             cout << " Iteration: "<< counter << "\tDifference: "<< (stateX-data.x_estimate).norm() << endl;
             if((stateX-data.x_estimate).norm() < Trainer::tol){
                 cout << "CONVERGENCE!" << endl;
@@ -108,9 +129,4 @@ void Trainer::train(Data& data){
             }
         }
     }
-    
-
-
-
 }
-
