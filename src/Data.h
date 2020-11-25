@@ -31,7 +31,7 @@ class Data{
         // y is the extended observation vector with y_0, y_0, ...,y_0,y_1,... 
         // where every observation is repeated K times 
         VectorXd y;
-
+        VectorXd assignments;
         // z = Ax - y
         VectorXd z;
 

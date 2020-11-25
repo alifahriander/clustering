@@ -11,10 +11,11 @@ Data::Data(Observation inputObservation, double R_x, double R_z, unsigned random
     // Get numbers of clusters and samples 
     x_true = inputObservation.x;
     y_observed = inputObservation.y;
+    assignments = inputObservation.assignments;
 
     int inSuccess = VectorToCSV(x_true, "/home/ander/Documents/git/clustering/x_true.csv", 4);
     inSuccess = VectorToCSV(y_observed, "/home/ander/Documents/git/clustering/y_observed.csv", 4);
-    inSuccess = VectorToCSV(inputObservation.assignments, "/home/ander/Documents/git/clustering/assignments.csv", 4);
+    inSuccess = VectorToCSV(assignments, "/home/ander/Documents/git/clustering/assignments.csv", 4);
 
     numberClusters = x_true.rows();
     numberSamples = y_observed.rows();
@@ -45,10 +46,17 @@ Data::Data(Observation inputObservation, double R_x, double R_z, unsigned random
     s_x = s_x.array().square();
 
     s_z = VectorXd(numberClusters*numberSamples);
+
     for(unsigned int i=0; i<numberClusters*numberSamples; ++i){
         s_z(i) = Data::uniformDistribution(0, 1);
     }
     s_z = s_z.array().square();
+    
+    // z = VectorXd(numberClusters*numberSamples);
+    // for(unsigned int i=0; i<numberClusters*numberSamples; ++i){
+    //     z(i) = Data::uniformDistribution(0, r_z*r_z*r_z);
+
+    // }
 
     W_x = MatrixXd(numberClusters,numberClusters);
     VectorXd V_x = s_x.array() + r_x*r_x;
@@ -63,11 +71,12 @@ Data::Data(Observation inputObservation, double R_x, double R_z, unsigned random
     // Draw x_estimate from normal distribution with mean zero and 
     // variance r_x^2 + s_x__i^2 
     // x_estimate = VectorXd::Constant(numberClusters,0.0);
-    x_estimate = VectorXd(numberClusters);
-    // x_estimate << -1.0, 1.0;
-    for(unsigned int i=0; i<numberClusters; ++i){
-        x_estimate(i) = Data::normalDistribution(0, V_x(i));
-    }
+
+    // x_estimate = VectorXd(numberClusters);
+    x_estimate = x_true;
+    // for(unsigned int i=0; i<numberClusters; ++i){
+    //     x_estimate(i) = Data::normalDistribution(0, V_x(i));
+    // }
     
     // Prepare z
     z = A*x_estimate - y;

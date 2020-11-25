@@ -14,6 +14,7 @@ using namespace Eigen;
 #define SNUV    0
 #define HUBER   1
 #define L1      2
+#define NUV     3
 
 
 

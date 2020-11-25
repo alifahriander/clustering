@@ -30,7 +30,7 @@ clusterVariance1 = config.loc["clusterVariance1"][1]
 clusterVariance2 = config.loc["clusterVariance2"][1]
 beta = config.loc["beta"][1]
 
-priorCodes = {0:"SNUV", 1:"HUBER", 2:"L1"}
+priorCodes = {0:"SNUV", 1:"HUBER", 2:"L1", 3:"NUV"}
 priorX = priorCodes[config.loc["lossFunctionX"][1]]
 priorZ = priorCodes[config.loc["lossFunctionZ"][1]]
 

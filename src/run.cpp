@@ -71,17 +71,18 @@ int main(){
 
     double r_x, r_z, clusterVariance1, clusterVariance2, clusterCenter1, clusterCenter2, beta;
     readCSV(path, r_x, r_z, clusterVariance1, clusterVariance2, clusterCenter1, clusterCenter2, beta);
-    
+    bool COMPUTE_DATA_RZ = false;
+
     double learning_rate = 0.0001;
     unsigned int numberOfIterations = 1000;
     double tolerance = 0.00001;
 
     bool trainingMode = IRCD;
-    unsigned int lossFunctionX = HUBER;
+    unsigned int lossFunctionX = NUV;
     unsigned int lossFunctionZ = SNUV;
 
-    unsigned int numberClusters = 2;
-    unsigned int numberSamples = 1000;
+    unsigned int numberClusters = 1;
+    unsigned int numberSamples = 10;
 
     // double r_x, r_z;    
     // r_x = 0.01;
@@ -96,8 +97,48 @@ int main(){
     //Create config.csv 
     ofstream configData;
     // configData.open("/home/ander/Documents/git/clustering/config.csv",ios::app);
-    configData.open("config.csv",ios::app);
+    
 
+
+
+    // Define cluster centers and variances 
+    VectorXd x(numberClusters);
+    // x << -1.0, 1.0;
+    // x << clusterCenter1, clusterCenter2;
+    x << clusterCenter1;
+    VectorXd variances(numberClusters);
+    // variances << 0.1, 0.1;
+    // variances << clusterVariance1, clusterVariance2;
+    variances << clusterVariance1;
+
+
+
+
+
+
+    Observation input_observation(x, variances, numberSamples, random_seed);
+
+    Data example =  Data(input_observation, r_x, r_z, random_seed, beta);
+    if(COMPUTE_DATA_RZ){
+        double mean = 0.0;
+        double variance = 0.0;
+        double std = 0.0;
+        for(int i=0; i<example.numberSamples;i++){
+            mean += example.y(i);
+        }
+        mean /= example.numberSamples;
+
+        for(int i=0; i<example.numberSamples;i++){
+            variance += (example.y(i)*example.y(i)) - (mean*mean) ;
+        }
+        variance /= example.numberSamples;
+        r_z= sqrt(variance);
+        example.r_z = r_z;
+
+    }
+    
+
+    configData.open("config.csv",ios::app);
     configData << "learning_rate" << "," << learning_rate << endl;
     configData << "numberOfIterations" << "," << numberOfIterations << endl;
     configData << "tolerance" << "," << tolerance << endl;
@@ -116,28 +157,9 @@ int main(){
 
     configData.close();
 
-
-
-    // Define cluster centers and variances 
-    VectorXd x(numberClusters);
-    // x << -1.0, 1.0;
-    x << clusterCenter1, clusterCenter2;
-    VectorXd variances(numberClusters);
-    // variances << 0.1, 0.1;
-    variances << clusterVariance1, clusterVariance2;
-
-
-
-
-
-
-    Observation input_observation(x, variances, numberSamples, random_seed);
-
-    Data example =  Data(input_observation, r_x, r_z, random_seed, beta);
-
     Trainer trainer(trainingMode, lossFunctionX, lossFunctionZ,learning_rate, numberOfIterations, tolerance);
     trainer.train(example);
-
+    cout << " R_Z " << r_z << endl;
     
 
     return 0;
