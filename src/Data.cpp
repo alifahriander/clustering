@@ -48,16 +48,11 @@ Data::Data(Observation inputObservation, double R_x, double R_z, unsigned random
     s_z = VectorXd(numberClusters*numberSamples);
 
     for(unsigned int i=0; i<numberClusters*numberSamples; ++i){
-        s_z(i) = Data::uniformDistribution(0, 1);
+        s_z(i) = Data::uniformDistribution(0, r_z*r_z);
     }
     s_z = s_z.array().square();
     
-    // z = VectorXd(numberClusters*numberSamples);
-    // for(unsigned int i=0; i<numberClusters*numberSamples; ++i){
-    //     z(i) = Data::uniformDistribution(0, r_z*r_z*r_z);
-
-    // }
-
+    // Form W_x and W_z matrices 
     W_x = MatrixXd(numberClusters,numberClusters);
     VectorXd V_x = s_x.array() + r_x*r_x;
     VectorXd vectorW_x = V_x.array().inverse();
@@ -71,13 +66,23 @@ Data::Data(Observation inputObservation, double R_x, double R_z, unsigned random
     // Draw x_estimate from normal distribution with mean zero and 
     // variance r_x^2 + s_x__i^2 
     // x_estimate = VectorXd::Constant(numberClusters,0.0);
+    //Compute data mean and variance 
+    double dataMean, dataStd;
+    computeMeanVarianceObservation( dataMean, dataStd);
+    cout << "DATA MEAN: " << dataMean;
+    cout << "\tDATA VARIANCE: " << dataStd;
 
-    // x_estimate = VectorXd(numberClusters);
-    x_estimate = x_true;
+    x_estimate = VectorXd(numberClusters);
+    x_estimate(0) = dataMean + dataStd;
+    x_estimate(1) = dataMean - dataStd;
     // for(unsigned int i=0; i<numberClusters; ++i){
-    //     x_estimate(i) = Data::normalDistribution(0, V_x(i));
+    //     // Sample x from uniform distribution with y_mean and +/-y_variance/2
+    //     // x_estimate(i) = Data::uniformDistribution(dataMean-3.0*dataStd/2.0, dataMean+3.0*dataStd/2.0);
+    //     // x_estimate(i) = dataMean;
+        
     // }
     
+
     // Prepare z
     z = A*x_estimate - y;
 
@@ -126,7 +131,18 @@ void Data::updateCost(VectorXd v, double r, int mode, double& cost){
 
 }
 
+void Data::computeMeanVarianceObservation(double& mean, double& std){
+        for(int i=0; i<numberSamples;i++){
+            mean +=  y_observed(i);
+        }
+        mean /= numberSamples;
 
+        for(int i=0; i<numberSamples;i++){
+            std += (y_observed(i)*y_observed(i)) - (mean*mean) ;
+        }
+        std /= numberSamples;
+        std = sqrt(std);
+}
 
 
 /*

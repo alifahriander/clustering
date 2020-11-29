@@ -39,7 +39,12 @@ class Data{
         double r_x;
         double r_z;
 
+        // For L1 and HUBER 
         double beta;
+
+        // For weighted update 
+        long double alpha = 0.1;
+
 
         VectorXd s_x;
         VectorXd s_z;
@@ -47,9 +52,17 @@ class Data{
         double costX;
         double costZ;
 
+        long double prevWx1 = 0.0;
+        long double prevEta1 = 0.0;
+
+        long double prevWx2 = 0.0;
+        long double prevEta2 = 0.0;
+
         default_random_engine generator_data;
     
         Data(Observation inputObservation, double r_x, double r_z, unsigned random_seed, double beta);
+        void computeMeanVarianceObservation(double& mean, double& variance);
+
         void updateW(MatrixXd& W,VectorXd s, double r);
         void updateData();
         void updateCost(VectorXd v, double r, int mode, double& cost);

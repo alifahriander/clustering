@@ -24,9 +24,7 @@ class Observation{
 
         Observation(VectorXd mean_vector, VectorXd variance_vector, unsigned int numberSamples, unsigned seed);
         double normalDistribution(double mean, double variance);
-        // bool bernoulliDistribution(float p);
         void computeObservation(unsigned int numberSamples);
-        void computeObservation(unsigned int numberSamples, bernoulli_distribution dist);
         unsigned int uniformDistribution(unsigned int min, unsigned int max);
 
 };

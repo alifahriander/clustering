@@ -1,7 +1,7 @@
 #include <iostream>
 #include <eigen3/Eigen/Core>
-#include  <chrono>
-#include  <random>
+#include <chrono>
+#include <random>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -15,6 +15,8 @@ using namespace Eigen;
 
 unsigned random_seed = std::chrono::system_clock::now().time_since_epoch().count();    
 
+//TODO: Read a Hashmap from CSV
+//TODO: Add writeCSV for clean code
 
 void readCSV(string path, double &r_x, double &r_z, double &clusterVariance1, double &clusterVariance2, double &clusterCenter1, double &clusterCenter2,double &beta){
     ifstream in(path);
@@ -81,35 +83,22 @@ int main(){
     unsigned int lossFunctionX = NUV;
     unsigned int lossFunctionZ = SNUV;
 
-    unsigned int numberClusters = 1;
-    unsigned int numberSamples = 10;
+    unsigned int numberClusters = 2;
+    unsigned int numberSamples = 100;
 
-    // double r_x, r_z;    
-    // r_x = 0.01;
-    // r_z = 0.01;
 
-    // const double clusterCenter1 = -100.0;
-    // const double clusterVariance1 = 20.0;
+
     
-    // const double clusterCenter2 = 100.0;
-    // const double clusterVariance2 = 1.0;
-
-    //Create config.csv 
-    ofstream configData;
-    // configData.open("/home/ander/Documents/git/clustering/config.csv",ios::app);
     
 
 
 
     // Define cluster centers and variances 
     VectorXd x(numberClusters);
-    // x << -1.0, 1.0;
-    // x << clusterCenter1, clusterCenter2;
-    x << clusterCenter1;
+    x << clusterCenter1, clusterCenter2;
+
     VectorXd variances(numberClusters);
-    // variances << 0.1, 0.1;
-    // variances << clusterVariance1, clusterVariance2;
-    variances << clusterVariance1;
+    variances << clusterVariance1, clusterVariance2;
 
 
 
@@ -137,7 +126,9 @@ int main(){
 
     }
     
-
+    //Create config.csv 
+    ofstream configData;
+    // configData.open("/home/ander/Documents/git/clustering/config.csv",ios::app);
     configData.open("config.csv",ios::app);
     configData << "learning_rate" << "," << learning_rate << endl;
     configData << "numberOfIterations" << "," << numberOfIterations << endl;
@@ -154,7 +145,6 @@ int main(){
     configData << "clusterCenter2" << "," << clusterCenter2 << endl;
     configData << "clusterVariance2" << "," << clusterVariance2 << endl;
     configData << "beta" << "," << beta << endl;
-
     configData.close();
 
     Trainer trainer(trainingMode, lossFunctionX, lossFunctionZ,learning_rate, numberOfIterations, tolerance);
