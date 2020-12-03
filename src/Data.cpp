@@ -47,9 +47,13 @@ Data::Data(Observation inputObservation, double R_x, double R_z, unsigned random
 
     s_z = VectorXd(numberClusters*numberSamples);
 
+    // for(unsigned int i=0; i<numberClusters*numberSamples; ++i){
+    //     s_z(i) = Data::uniformDistribution(0, r_z*r_z*r_z);
+    // }
     for(unsigned int i=0; i<numberClusters*numberSamples; ++i){
-        s_z(i) = Data::uniformDistribution(0, r_z*r_z*r_z);
+        s_z(i) = Data::uniformDistribution(0, 1);
     }
+
     s_z = s_z.array().square();
     
     // Form W_x and W_z matrices 
@@ -73,8 +77,11 @@ Data::Data(Observation inputObservation, double R_x, double R_z, unsigned random
     cout << "\tDATA VARIANCE: " << dataStd;
 
     x_estimate = VectorXd(numberClusters);
-    x_estimate(0) = dataMean + dataStd/2.0 + Data::uniformDistribution(-1, 1);
-    x_estimate(1) = dataMean - dataStd/2.0 + Data::uniformDistribution(-1, 1);
+
+    x_estimate = initXEstimate();
+
+    // x_estimate(0) = dataMean + dataStd/2.0 + Data::uniformDistribution(-1, 1);
+    // x_estimate(1) = dataMean - dataStd/2.0 + Data::uniformDistribution(-1, 1);
     // for(unsigned int i=0; i<numberClusters; ++i){
     //     // Sample x from uniform distribution with y_mean and +/-y_variance/2
     //     x_estimate(i) = Data::uniformDistribution(dataMean-dataStd, dataMean+dataStd);        
@@ -157,6 +164,62 @@ double Data::uniformDistribution(double min, double_t max){
     return distrib(generator_data);
 
 }
+
+VectorXd Data::initXEstimate(){
+    VectorXd centers(numberClusters);
+    // Step 1 : Select one point from y as cluster center
+    centers(0) = y_observed((unsigned int)uniformDistribution(0,numberSamples));
+    cout << "First Center:" << centers(0) << endl;
+    double prevCenter = centers(0);
+
+    for(unsigned int i = 1; i < numberClusters; i++){
+        //Step 2 : Compute distances between 
+        VectorXd distances = computeDistances(prevCenter);
+        // prevCenter = y(findMaxDistanceIndex(distances));
+        prevCenter = y(selectFromDistribution(distances));
+        centers(i) = prevCenter;
+    }
+    return centers;
+
+}
+
+VectorXd Data::computeDistances(double center){
+    VectorXd dists(numberSamples);
+    for(unsigned int j=0; j<numberSamples; j++){
+        dists(j) = (double) pow((y(j) - center),2);
+    }
+    return dists;
+
+}
+unsigned int Data::findMaxDistanceIndex(VectorXd distances){
+    double max = 0;
+    unsigned int maxIdx = 0;
+
+    for(unsigned int i=0; i<numberSamples; i++){
+        if(distances(i) > max){
+            max = distances(i);
+            maxIdx = i;
+        }
+    }
+    return maxIdx;
+
+
+}
+unsigned int Data::selectFromDistribution(VectorXd distances){
+    distances = distances.normalized();
+    // cout << distances << endl;
+    double randomValue = uniformDistribution(0,1);
+    double runningSum = 0.0;
+    for(unsigned int i = 0; i<numberSamples; i++){
+        runningSum += distances(i);
+        if(runningSum > randomValue){
+            // cout << " INDEX SELECTED:" << i << endl;
+            return i;
+        }
+    }
+    return 0;
+}
+
 
 void Data::printData(){
     cout << "========================================" << endl;

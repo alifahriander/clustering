@@ -72,7 +72,10 @@ class Data{
         void saveData(bool init);
         int VectorToCSV(const MatrixXd& inputMatrix, const string& fileName, const streamsize dPrec);
         int VectorToCSV(double Scalar, const string& fileName, const streamsize dPrec);
-
+        VectorXd initXEstimate();
+        VectorXd computeDistances(double center);
+        unsigned int findMaxDistanceIndex(VectorXd distances);
+        unsigned int selectFromDistribution(VectorXd distances);
 
 };
 

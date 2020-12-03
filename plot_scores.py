@@ -14,39 +14,20 @@ path_csv = args.path
 
 df = pd.read_csv(path_csv)
 
-stats = df.groupby(['experiment','beta','r_x','r_z']).agg({'score': ['mean','min', 'max']}).sort_values(by=("score","min"),ascending=True)
-print(stats.iloc[1,:])
-stats.to_csv("./results_all/stats.csv")
-rxs = stats.index.get_level_values("r_x").values
+scores = df["score"].values
+x = np.log10(df["r_z"].values)
+plt.scatter(x,scores,c='b',label="Score")
+
+stats = df.groupby(['experiment','r_z']).agg({'score': ['mean','min', 'max']}).sort_values(by=("score","min"),ascending=True)
+stats.to_csv("./experiments/stats.csv")
+
+
+
 rzs =stats.index.get_level_values("r_z").values
-betas = stats.index.get_level_values("beta").values
- 
-
-fig = plt.figure()
-ax = fig.add_subplot(111,projection='3d')
-ax.set_xlabel("r_x")
-ax.set_ylabel("beta")
-ax.set_zlabel("r_z")
-ax.set_facecolor('black')
-
-ax.xaxis.label.set_color('red')
-ax.tick_params(axis='x', colors='white')
-
-ax.yaxis.label.set_color('red')
-ax.tick_params(axis='y', colors='white')
-
-ax.zaxis.label.set_color('red')
-ax.tick_params(axis='z', colors='white')
-
-
-
-ax.title.set_text("Minimal Hyperparameter Scores in 10^i")
-img = ax.scatter(np.log10(rxs), np.log10(betas), np.log10(rzs), c=stats.iloc[:,1].values, cmap=plt.jet())
-
-
-
-
-
-fig.colorbar(img)
+plt.scatter(np.log10(rzs), stats.iloc[:,0].values,c='r',label="Mean")
+plt.title("Scores for R_z")
+plt.xlabel("R_z (10^i)")
+plt.ylabel("Score")
+plt.legend()
 plt.show()
 
