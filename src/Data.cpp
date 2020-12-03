@@ -48,7 +48,7 @@ Data::Data(Observation inputObservation, double R_x, double R_z, unsigned random
     s_z = VectorXd(numberClusters*numberSamples);
 
     for(unsigned int i=0; i<numberClusters*numberSamples; ++i){
-        s_z(i) = Data::uniformDistribution(0, r_z*r_z);
+        s_z(i) = Data::uniformDistribution(0, r_z*r_z*r_z);
     }
     s_z = s_z.array().square();
     
@@ -73,16 +73,13 @@ Data::Data(Observation inputObservation, double R_x, double R_z, unsigned random
     cout << "\tDATA VARIANCE: " << dataStd;
 
     x_estimate = VectorXd(numberClusters);
-    x_estimate(0) = dataMean + dataStd;
-    x_estimate(1) = dataMean - dataStd;
+    x_estimate(0) = dataMean + dataStd/2.0 + Data::uniformDistribution(-1, 1);
+    x_estimate(1) = dataMean - dataStd/2.0 + Data::uniformDistribution(-1, 1);
     // for(unsigned int i=0; i<numberClusters; ++i){
     //     // Sample x from uniform distribution with y_mean and +/-y_variance/2
-    //     // x_estimate(i) = Data::uniformDistribution(dataMean-3.0*dataStd/2.0, dataMean+3.0*dataStd/2.0);
-    //     // x_estimate(i) = dataMean;
-        
+    //     x_estimate(i) = Data::uniformDistribution(dataMean-dataStd, dataMean+dataStd);        
     // }
     
-
     // Prepare z
     z = A*x_estimate - y;
 
