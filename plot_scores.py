@@ -30,5 +30,4 @@ plt.xlabel("R_z (10^i)")
 plt.ylabel("Score")
 plt.legend()
 
-plt.set_size_inches((11, 8.5), forward=False)
-plt.savefig("./result.png", dpi=500)
+plt.show()

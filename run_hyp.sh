@@ -3,7 +3,7 @@ paramsRz=(0.01 0.1 1.0 10.0 100.0 1000.0 10000.0)
 
 
 
-ARG_NR_EXPERIMENTS=1
+ARG_NR_EXPERIMENTS=10
 CONFIG_FILE="./config/r_z.csv"
 
 
