@@ -4,10 +4,9 @@
 #include "assert.h"
 #include "Trainer.h"
 
-Data::Data(Observation inputObservation, double R_x, double R_z, unsigned random_seed, double inputBeta){
+Data::Data(Observation inputObservation, double R_z, unsigned random_seed){
     generator_data.seed(random_seed);
 
-    beta = inputBeta;
     // Get numbers of clusters and samples 
     x_true = inputObservation.x;
     y_observed = inputObservation.y;
@@ -19,6 +18,9 @@ Data::Data(Observation inputObservation, double R_x, double R_z, unsigned random
 
     numberClusters = x_true.rows();
     numberSamples = y_observed.rows();
+
+    forwardMessageW = VectorXd(numberClusters);
+    forwardMessageEta =VectorXd(numberClusters);
 
     // Prepare y 
     y = VectorXd(numberSamples*numberClusters);
@@ -36,57 +38,27 @@ Data::Data(Observation inputObservation, double R_x, double R_z, unsigned random
     }
 
     // Prepare variances
-    r_x = R_x;
     r_z = R_z;
 
-    s_x = VectorXd(numberClusters);
-    for(unsigned int i=0; i<numberClusters; ++i){
-        s_x(i) = Data::uniformDistribution(0, 1);
-    }
-    s_x = s_x.array().square();
-
     s_z = VectorXd(numberClusters*numberSamples);
-
-    // for(unsigned int i=0; i<numberClusters*numberSamples; ++i){
-    //     s_z(i) = Data::uniformDistribution(0, r_z*r_z*r_z);
-    // }
     for(unsigned int i=0; i<numberClusters*numberSamples; ++i){
         s_z(i) = Data::uniformDistribution(0, 1);
     }
-
     s_z = s_z.array().square();
     
     // Form W_x and W_z matrices 
+    s_x = VectorXd(numberClusters);
     W_x = MatrixXd(numberClusters,numberClusters);
-    VectorXd V_x = s_x.array() + r_x*r_x;
-    VectorXd vectorW_x = V_x.array().inverse();
-    W_x = vectorW_x.asDiagonal();
+
 
     W_z = MatrixXd(numberClusters*numberSamples, numberClusters*numberSamples);
     VectorXd V_z = s_z.array()+ r_z*r_z;
     VectorXd vectorW_z = V_z.array().inverse();
     W_z = vectorW_z.asDiagonal();
 
-    // Draw x_estimate from normal distribution with mean zero and 
-    // variance r_x^2 + s_x__i^2 
-    // x_estimate = VectorXd::Constant(numberClusters,0.0);
-    //Compute data mean and variance 
-    double dataMean, dataStd;
-    computeMeanVarianceObservation( dataMean, dataStd);
-    cout << "DATA MEAN: " << dataMean;
-    cout << "\tDATA VARIANCE: " << dataStd;
 
-    x_estimate = VectorXd(numberClusters);
-
+    //KMeans++ initialization
     x_estimate = initXEstimate();
-
-    // x_estimate(0) = dataMean + dataStd/2.0 + Data::uniformDistribution(-1, 1);
-    // x_estimate(1) = dataMean - dataStd/2.0 + Data::uniformDistribution(-1, 1);
-    // for(unsigned int i=0; i<numberClusters; ++i){
-    //     // Sample x from uniform distribution with y_mean and +/-y_variance/2
-    //     x_estimate(i) = Data::uniformDistribution(dataMean-dataStd, dataMean+dataStd);        
-    // }
-    
     // Prepare z
     z = A*x_estimate - y;
 
@@ -108,45 +80,16 @@ void Data::updateW(MatrixXd& W,VectorXd s, double r){
     W = sumVariance.asDiagonal();
 }
 
-void Data::updateCost(VectorXd v, double r, int mode, double& cost){
+void Data::updateCost(VectorXd v, double r, double& cost){
     double accumulatedCost = 0.0;
-
-    if(mode==SNUV){
-        for(unsigned int i=0; i<v.size(); i++){
-            if(v(i)*v(i) < r*r) accumulatedCost += (v(i)*v(i) /(2*r*r)) + log(r);
-            else accumulatedCost += log(abs(v(i))) + 0.5;
-        }
-
+    for(unsigned int i=0; i<v.size(); i++){
+        if(v(i)*v(i) < r*r) accumulatedCost += (v(i)*v(i) /(2*r*r)) + log(r);
+        else accumulatedCost += log(abs(v(i))) + 0.5;
     }
-    else if(mode == HUBER){
-        for(unsigned int i=0; i<numberClusters; ++i){
-            if(x_estimate(i)<beta*r_x*r_x) accumulatedCost += x_estimate(i)*x_estimate(i)/(2*r_x*r_x);
-            else accumulatedCost += beta * abs(x_estimate(i)) - beta*beta *r_x*r_x/2.0;
-        }
-    }
-    else if(mode == L1){
-        for(unsigned int i=0; i<numberClusters; ++i){
-            accumulatedCost += abs(beta*x_estimate(i));  
-        }
-    }
+    
     cost = accumulatedCost;
-
-
-
 }
 
-void Data::computeMeanVarianceObservation(double& mean, double& std){
-        for(int i=0; i<numberSamples;i++){
-            mean +=  y_observed(i);
-        }
-        mean /= numberSamples;
-
-        for(int i=0; i<numberSamples;i++){
-            std += (y_observed(i)*y_observed(i)) - (mean*mean) ;
-        }
-        std /= numberSamples;
-        std = sqrt(std);
-}
 
 
 /*
@@ -169,15 +112,16 @@ VectorXd Data::initXEstimate(){
     VectorXd centers(numberClusters);
     // Step 1 : Select one point from y as cluster center
     centers(0) = y_observed((unsigned int)uniformDistribution(0,numberSamples));
-    cout << "First Center:" << centers(0) << endl;
+    cout << "Center 0:" << centers(0) << endl;
     double prevCenter = centers(0);
 
     for(unsigned int i = 1; i < numberClusters; i++){
         //Step 2 : Compute distances between 
         VectorXd distances = computeDistances(prevCenter);
-        // prevCenter = y(findMaxDistanceIndex(distances));
         prevCenter = y(selectFromDistribution(distances));
         centers(i) = prevCenter;
+        cout << "Center "<< i << ": " << centers(i) << endl;
+
     }
     return centers;
 
@@ -191,20 +135,7 @@ VectorXd Data::computeDistances(double center){
     return dists;
 
 }
-unsigned int Data::findMaxDistanceIndex(VectorXd distances){
-    double max = 0;
-    unsigned int maxIdx = 0;
 
-    for(unsigned int i=0; i<numberSamples; i++){
-        if(distances(i) > max){
-            max = distances(i);
-            maxIdx = i;
-        }
-    }
-    return maxIdx;
-
-
-}
 unsigned int Data::selectFromDistribution(VectorXd distances){
     distances = distances.normalized();
     // cout << distances << endl;
@@ -213,7 +144,6 @@ unsigned int Data::selectFromDistribution(VectorXd distances){
     for(unsigned int i = 0; i<numberSamples; i++){
         runningSum += distances(i);
         if(runningSum > randomValue){
-            // cout << " INDEX SELECTED:" << i << endl;
             return i;
         }
     }
@@ -232,7 +162,6 @@ void Data::printData(){
 }
 
 void Data::updateData(){
-    Data::updateW(W_x, s_x, r_x);
     Data::updateW(W_z, s_z, r_z);
     //TODO: Add updateCost
     // Data::printData();
@@ -289,8 +218,6 @@ void Data::saveData(bool init){
     success = Data::VectorToCSV(z,"/home/ander/Documents/git/clustering/z.csv", 4);
     if(success != 0) cout<<"Vector couldn't be saved!"<<endl;
     if(!init){
-    success = Data::VectorToCSV(costX,"/home/ander/Documents/git/clustering/costX.csv", 10);
-    if(success != 0) cout<<"Vector couldn't be saved!"<<endl;
     success = Data::VectorToCSV(costZ,"/home/ander/Documents/git/clustering/costZ.csv", 10);
     if(success != 0) cout<<"Vector couldn't be saved!"<<endl;
     }

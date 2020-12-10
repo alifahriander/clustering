@@ -17,6 +17,9 @@ Observation::Observation(VectorXd mean_vector, VectorXd variance_vector, unsigne
 
     Observation::computeObservation(numberSamples);
 }
+Observation::Observation(){
+
+}
 
 /*
 * Draw sample from normal distribution

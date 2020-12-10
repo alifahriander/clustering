@@ -36,11 +36,7 @@ class Data{
         VectorXd z;
 
         // SNUV parameters 
-        double r_x;
         double r_z;
-
-        // For L1 and HUBER 
-        double beta;
 
         // For weighted update 
         long double alpha = 0.1;
@@ -52,20 +48,16 @@ class Data{
         double costX;
         double costZ;
 
-        long double prevWx1 = 0.0;
-        long double prevEta1 = 0.0;
+        VectorXd forwardMessageW;
+        VectorXd forwardMessageEta;
 
-        long double prevWx2 = 0.0;
-        long double prevEta2 = 0.0;
 
         default_random_engine generator_data;
     
-        Data(Observation inputObservation, double r_x, double r_z, unsigned random_seed, double beta);
-        void computeMeanVarianceObservation(double& mean, double& variance);
-
+        Data(Observation inputObservation, double r_z, unsigned random_seed);
         void updateW(MatrixXd& W,VectorXd s, double r);
         void updateData();
-        void updateCost(VectorXd v, double r, int mode, double& cost);
+        void updateCost(VectorXd v, double r, double& cost);
         double normalDistribution(double mean, double variance);
         double uniformDistribution(double min, double max);
         void printData();
@@ -74,7 +66,6 @@ class Data{
         int VectorToCSV(double Scalar, const string& fileName, const streamsize dPrec);
         VectorXd initXEstimate();
         VectorXd computeDistances(double center);
-        unsigned int findMaxDistanceIndex(VectorXd distances);
         unsigned int selectFromDistribution(VectorXd distances);
 
 };

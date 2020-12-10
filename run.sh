@@ -25,6 +25,10 @@ else
     NUMBER=$(($NUMBER + 1))
 fi
 
+mkdir experiments
+cp -r config experiments
+cp -r data experiments
+
 EXPERIMENT='experiments/experiment'
 ARG_RESULT="$EXPERIMENT""$NUMBER"
 
@@ -39,7 +43,9 @@ do
     rm *.csv
 
     # echo "Running script"
-    ./build/clustering
+    # if data exists use 1 
+    ./build/clustering 1
+    # to create data run ./build/clustering 0
 
     python3 plot_experiment.py --path .
 

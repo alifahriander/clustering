@@ -3,6 +3,31 @@ import numpy as np
 import os
 import glob
 import argparse
+from scipy.spatial.distance import cdist
+def computeDistances(vTrue, vEstimate):
+    distanceMatrix = []
+    for i in vTrue:
+        row = []
+        for j in vEstimate:
+            row.append(np.linalg.norm(i-j,))
+        distanceMatrix.append(row)
+    return np.array(distanceMatrix)
+
+def computeMinCost(matrix):
+    distanceMatrix = matrix.copy()
+    cost = 0.0
+    # for row in distanceMatrix:
+    while(np.amin(distanceMatrix) != np.inf):
+        idx = np.unravel_index(np.argmin(distanceMatrix, axis=None), distanceMatrix.shape)
+        cost += distanceMatrix[idx]
+        distanceMatrix[idx[0],:] = np.inf
+        distanceMatrix[:,idx[1]] = np.inf
+    return cost
+
+
+
+
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--path", type=str,required=True)
 args = parser.parse_args()
@@ -14,13 +39,9 @@ name_x_estimate = "x_estimate.csv"
 name_x_true = "x_true.csv"
 name_config = "config.csv"
 
-path_csv = "./results_all/result.csv"
+path_csv = os.path.join(PATH,"result.csv")
 
-path_config = os.path.join(dirs[0],name_config)
-config = pd.read_csv(path_config,header=None)
-config = config.transpose()
-config.columns = config.iloc[0]
-df = pd.DataFrame(columns=["score","folder","experiment",*config.columns])
+df = pd.DataFrame(columns=["experiment","folder","r_z","score",])
 
 for d in dirs:
     path_x_estimate = os.path.join(d,name_x_estimate)
@@ -30,23 +51,16 @@ for d in dirs:
 
     x_estimate = pd.read_csv(path_x_estimate,header=None)
     x_true = pd.read_csv(path_x_true,header=None)
-    config = pd.read_csv(path_config,header=None)
+    r_z = pd.read_csv(path_config,header=None, index_col=0).loc["r_z",1]
 
-    v_estimate = x_estimate.iloc[-1,:].values
-    v_true = x_true.iloc[0,:].values
 
-    d1 = np.linalg.norm(v_true-v_estimate)
-    d2 = np.linalg.norm(v_true-np.flip(v_estimate))
+    v_estimate = np.array([[x] for x in x_estimate.iloc[-1,:]])
+    v_true = np.array([[x] for x in x_true.iloc[-1,:]])
 
-    score = d1 if d1<d2 else d2
-    config = config.transpose()
-    config.columns = config.iloc[0]
-    config = config.drop(config.index[0])
-    config["score"] = score 
-    config["folder"] = d
-    config["experiment"] = os.path.dirname(d)
-    config["numberOfIterations"] = x_estimate.index[-1]
-    df = df.append(dict(zip(config.columns,config.values[0])),ignore_index=True)
+    distances = computeDistances(v_true, v_estimate)
+    score = computeMinCost(distances)
+
+    df = df.append({"experiment":os.path.dirname(d),"folder":d,"r_z":r_z,"score":score},ignore_index=True)
 
 df = df.sort_values(by=["score"],ascending=True)
 df.to_csv(path_csv,index=False)

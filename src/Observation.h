@@ -2,6 +2,7 @@
 #define OBSERVATION_H
 #include <iostream>
 #include <eigen3/Eigen/Core>
+#include <string>
 
 
 using namespace Eigen;
@@ -15,17 +16,17 @@ class Observation{
         VectorXd assignments;
         VectorXd y;
 
-        
-
         VectorXd variances;
-        
 
         default_random_engine generator_observation;
 
         Observation(VectorXd mean_vector, VectorXd variance_vector, unsigned int numberSamples, unsigned seed);
+        Observation();
+
         double normalDistribution(double mean, double variance);
-        void computeObservation(unsigned int numberSamples);
         unsigned int uniformDistribution(unsigned int min, unsigned int max);
+
+        void computeObservation(unsigned int numberSamples);
 
 };
 #endif 
