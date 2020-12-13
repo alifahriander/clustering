@@ -24,9 +24,8 @@ void Trainer::updateX(Data& data){
         // Backward Message
         for(int i=0;i<data.numberSamples;i++){
             // Consider s_z if it is not equal to zero
-            tmp = data.s_z(i*data.numberClusters + k);
-            if(tmp != 0.0)w += 1 / tmp ;
-            else continue;
+            tmp = data.r_z * data.r_z + data.s_z(i*data.numberClusters + k);
+            w += 1 / tmp ;
             eta+= (1/tmp) * data.y(i);
         }
 
@@ -71,9 +70,9 @@ void Trainer::train(Data& data){
     for(unsigned int counter=0; counter<Trainer::numberIterations; counter++){
         //Save last estimate for convergence condition
         Trainer::stateX = data.x_estimate;    
-
-        Trainer::updateX(data);
         Trainer::updateSz(data);
+        Trainer::updateX(data);
+        
 
         //If at least one of s_xi is 0, stop the training
         bool stopTraining = false;

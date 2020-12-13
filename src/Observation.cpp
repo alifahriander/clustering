@@ -7,6 +7,7 @@ using namespace std;
 
 
 Observation::Observation(VectorXd mean_vector, VectorXd variance_vector, unsigned int numberSamples, unsigned seed){
+    cout << "I'm here" << endl;
     x = mean_vector;
     y = VectorXd(numberSamples);
     assignments = VectorXd(numberSamples);
@@ -17,6 +18,44 @@ Observation::Observation(VectorXd mean_vector, VectorXd variance_vector, unsigne
 
     Observation::computeObservation(numberSamples);
 }
+
+Observation::Observation(MatrixXd mean_matrix, MatrixXd variance_matrix, unsigned int numberSamples, unsigned seed){
+    dimension = mean_matrix.cols();
+
+
+    // // Matrix<double,Dynamic,Dynamic,RowMajor> variance(variance_matrix);
+    // // Map<RowVectorXd> variances(variance.data(), variance.size());
+
+    
+    Y = MatrixXd(numberSamples,dimension);
+    assignments = VectorXd(numberSamples);
+
+    MatrixXd covariances[mean_matrix.rows()];
+
+    for(unsigned int i=0; i<mean_matrix.rows(); ++i){
+
+        Matrix<double,Dynamic,Dynamic,RowMajor> flatCovariance = MatrixXd(1,dimension*dimension);
+        flatCovariance << variance_matrix.row(i);
+        flatCovariance.resize(dimension,dimension);
+        covariances[i] = flatCovariance;
+
+    }
+
+
+    MatrixXd choleskyMatrices[mean_matrix.rows()];
+    for(unsigned int i=0; i<mean_matrix.rows(); ++i){
+        LLT<MatrixXd> lltMatrix(covariances[i]);
+        MatrixXd L = lltMatrix.matrixL();
+        choleskyMatrices[i] = L;
+
+    }
+
+    generator_observation.seed(seed);
+
+    Observation::computeObservation(mean_matrix, choleskyMatrices, numberSamples);
+}
+
+
 Observation::Observation(){
 
 }
@@ -51,4 +90,23 @@ void Observation::computeObservation(unsigned int numberSamples){
     }
 }
 
+void Observation::computeObservation(MatrixXd meanMatrix, MatrixXd choleskyMatrices[], unsigned int numberSamples){
+    MatrixXd observation(numberSamples,meanMatrix.cols());
+    for(unsigned int i=0; i<numberSamples; i++){
+        assignments(i) = (int) uniformDistribution(0,1);
+        VectorXd normalVector(dimension);
+        // normalVector = N(0,I);
+        for(unsigned int k=0; k<dimension;++k){
+            normalVector(k) = normalDistribution(0.0,1.0);
+        }
+        //normalVector = L * normalVector;
+        normalVector = choleskyMatrices[(unsigned int) assignments(i)] * normalVector;
+        // m + normalVector
+        observation.row(i) = (meanMatrix.row(assignments(i)).transpose() + normalVector).transpose();
+
+    }
+    Y = observation;
+    cout << Y << endl;
+
+}
 

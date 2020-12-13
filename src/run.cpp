@@ -88,69 +88,80 @@ int writeVector(const MatrixXd& inputMatrix, const string& fileName, const strea
 	return 0;
 }
 
+int main(){
+    MatrixXd x(2,2);
+    MatrixXd variance(2,4);
+    x << 1,1,
+        10,10;
+    variance << 2,0.5,2,0.5,
+                3,0.5,3,0.5;
+    cout << variance << endl;
+    Observation(x,variance,5,1);
+    return 0;
+}
 
-int main(int argc, char** argv){
-    // Read from command line 
-    bool DATA_READY;
-    istringstream(argv[1]) >> DATA_READY;
+// int main(int argc, char** argv){
+//     // Read from command line 
+//     bool DATA_READY;
+//     istringstream(argv[1]) >> DATA_READY;
 
-    // Load configuration
-    double r_z;
-    unsigned int numberIterations;
-    double tolerance;
-    loadScalars(r_z, numberIterations, tolerance);
-
-
-    //Load vectors from CSV
-    VectorXd x;
-    VectorXd y;
-    VectorXd assignments;
-    Observation inputObservation = Observation();
+//     // Load configuration
+//     double r_z;
+//     unsigned int numberIterations;
+//     double tolerance;
+//     loadScalars(r_z, numberIterations, tolerance);
 
 
-    if(DATA_READY){
-        loadVectors(x, y, assignments);
+//     //Load vectors from CSV
+//     VectorXd x;
+//     VectorXd y;
+//     VectorXd assignments;
+//     Observation inputObservation = Observation();
 
-        inputObservation.y = y;
-        inputObservation.assignments = assignments;
-        inputObservation.x = x;
 
-    }else{
-        // Read config for number of samples, clusters and variances
+//     if(DATA_READY){
+//         loadVectors(x, y, assignments);
 
-        VectorXd centers = loadVector("config/centers.csv");
-        VectorXd variances = loadVector("config/variances.csv");
+//         inputObservation.y = y;
+//         inputObservation.assignments = assignments;
+//         inputObservation.x = x;
 
-        unsigned int numberSamples, numberClusters;
-        numberClusters = centers.size();
-        numberSamples = loadScalar("config/numberSamples.csv");
+//     }else{
+//         // Read config for number of samples, clusters and variances
 
-        inputObservation = Observation(centers, variances, numberSamples, random_seed);
-        writeVector(inputObservation.assignments, "data/assignments.csv", 4);
-        writeVector(inputObservation.y, "data/y.csv", 4);
-        writeVector(centers,"data/x.csv", 4);
+//         VectorXd centers = loadVector("config/centers.csv");
+//         VectorXd variances = loadVector("config/variances.csv");
 
-        cout << "Data created and saved in data folder."<< endl;
-        cout << "Data consists of " << numberClusters << "clusters and " << numberSamples << " samples."<< endl;
-        return 0;
-    }
+//         unsigned int numberSamples, numberClusters;
+//         numberClusters = centers.size();
+//         numberSamples = loadScalar("config/numberSamples.csv");
+
+//         inputObservation = Observation(centers, variances, numberSamples, random_seed);
+//         writeVector(inputObservation.assignments, "data/assignments.csv", 4);
+//         writeVector(inputObservation.y, "data/y.csv", 4);
+//         writeVector(centers,"data/x.csv", 4);
+
+//         cout << "Data created and saved in data folder."<< endl;
+//         cout << "Data consists of " << numberClusters << " clusters and " << numberSamples << " samples."<< endl;
+//         return 0;
+//     }
 
  
-    Data inputData =  Data(inputObservation, r_z, random_seed);
+//     Data inputData =  Data(inputObservation, r_z, random_seed);
 
     
-    // Create config.csv 
-    ofstream configData;
-    configData.open("config.csv",ios::app);
-    configData << "numberOfIterations" << "," << numberIterations << endl;
-    configData << "tolerance" << "," << tolerance << endl;
-    configData << "r_z" << "," << r_z << endl;
-    configData.close();
+//     // Create config.csv 
+//     ofstream configData;
+//     configData.open("config.csv",ios::app);
+//     configData << "numberOfIterations" << "," << numberIterations << endl;
+//     configData << "tolerance" << "," << tolerance << endl;
+//     configData << "r_z" << "," << r_z << endl;
+//     configData.close();
 
-    Trainer trainer(numberIterations, tolerance);
-    trainer.train(inputData);
+//     Trainer trainer(numberIterations, tolerance);
+//     trainer.train(inputData);
     
 
-    return 0;
+//     return 0;
 
-}
+// }
