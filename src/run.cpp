@@ -9,35 +9,11 @@
 #include "Data.h"
 #include "Trainer.h"
 #include "Observation.h"
+#include "util.h"
 
 using namespace std;
 using namespace Eigen;
-
 unsigned random_seed = std::chrono::system_clock::now().time_since_epoch().count();    
-
-
-VectorXd loadVector(string path){
-    ifstream dataFile(path);
-    string rowString;
-    string entry;
-    int rowNumber = 0;
-
-    vector<double> vectorEntries;
-
-
-    while (getline(dataFile, rowString))
-    {
-        stringstream rowStringStream(rowString); 
- 
-        while (getline(rowStringStream, entry, ',')) 
-        {
-            vectorEntries.push_back(stod(entry));
-        }
-        rowNumber++; //update the column numbers
-    }
-    
-    return Eigen::Map<Eigen::VectorXd, Eigen::Unaligned>(vectorEntries.data(), vectorEntries.size());
-}
 
 double loadScalar(string path){
     double value;
@@ -54,11 +30,6 @@ double loadScalar(string path){
     return value;
 }
 
-void loadVectors(VectorXd& x, VectorXd& y, VectorXd& assignments){
-    x = loadVector("data/x.csv");
-    y = loadVector("data/y.csv");
-    assignments = loadVector("data/assignments.csv");
-}
 
 void loadScalars(double& r_z, unsigned int& numberOfIterations, double& tolerance){
     r_z = loadScalar("config/r_z.csv");
@@ -67,101 +38,95 @@ void loadScalars(double& r_z, unsigned int& numberOfIterations, double& toleranc
 }
 
 
-int writeVector(const MatrixXd& inputMatrix, const string& fileName, const streamsize dPrec) {
-	int i;
-    assert( inputMatrix.cols() == 1 );
-
-	ofstream outputData;
-    // Always appends
-	outputData.open(fileName, ios::app);
-	if (!outputData)
-		return -1;
-	outputData.precision(dPrec);
-	for (i = 0; i < inputMatrix.rows(); i++) {
-		outputData << inputMatrix(i);
-        outputData << endl;
-	}
-	outputData.close();
-
-	if (!outputData)
-		return -1;
-	return 0;
-}
-
-int main(){
-    MatrixXd x(2,2);
-    MatrixXd variance(2,4);
-    x << 1,1,
-        10,10;
-    variance << 2,0.5,2,0.5,
-                3,0.5,3,0.5;
-    cout << variance << endl;
-    Observation(x,variance,5,1);
-    return 0;
-}
-
-// int main(int argc, char** argv){
-//     // Read from command line 
-//     bool DATA_READY;
-//     istringstream(argv[1]) >> DATA_READY;
-
-//     // Load configuration
-//     double r_z;
-//     unsigned int numberIterations;
-//     double tolerance;
-//     loadScalars(r_z, numberIterations, tolerance);
 
 
-//     //Load vectors from CSV
-//     VectorXd x;
-//     VectorXd y;
-//     VectorXd assignments;
-//     Observation inputObservation = Observation();
 
 
-//     if(DATA_READY){
-//         loadVectors(x, y, assignments);
+int main(int argc, char** argv){
+    int success = 0;
+    // Read from command line 
+    bool DATA_READY;
+    istringstream(argv[1]) >> DATA_READY;
 
-//         inputObservation.y = y;
-//         inputObservation.assignments = assignments;
-//         inputObservation.x = x;
+    // Load configuration
+    double r_z;
+    unsigned int numberIterations;
+    double tolerance;
+    loadScalars(r_z, numberIterations, tolerance);
 
-//     }else{
-//         // Read config for number of samples, clusters and variances
 
-//         VectorXd centers = loadVector("config/centers.csv");
-//         VectorXd variances = loadVector("config/variances.csv");
+    //Load vectors from CSV
+    MatrixXd x, y, assignments;
+    Observation inputObservation = Observation();
+    unsigned int dimension;
+    cout << "CHECKPOINT 1" << endl;
 
-//         unsigned int numberSamples, numberClusters;
-//         numberClusters = centers.size();
-//         numberSamples = loadScalar("config/numberSamples.csv");
+    if(DATA_READY){
+        int success = readMatrix(x, "data/x.csv", 4);
+        if(success == -1) cout << "Error when reading x.csv" << endl;
+        success = readMatrix(y, "data/y.csv", 4);
+        if(success == -1) cout << "Error when reading y.csv" << endl;
+        success = readMatrix(assignments, "data/assignments.csv", 4);
+        if(success == -1) cout << "Error when reading assignments.csv" << endl;
 
-//         inputObservation = Observation(centers, variances, numberSamples, random_seed);
-//         writeVector(inputObservation.assignments, "data/assignments.csv", 4);
-//         writeVector(inputObservation.y, "data/y.csv", 4);
-//         writeVector(centers,"data/x.csv", 4);
+        cout << "all matrices are read" << endl;
+        cout << " y dimensions : "<< y.rows() << "x"<<y.cols()<<endl;
+        inputObservation.y = y;
+        inputObservation.x = x;
+        inputObservation.assignments = assignments;
+        dimension = x.cols();
+        cout << "Dimension: " << dimension << endl;
 
-//         cout << "Data created and saved in data folder."<< endl;
-//         cout << "Data consists of " << numberClusters << " clusters and " << numberSamples << " samples."<< endl;
-//         return 0;
-//     }
+    }else{
+        // Read config for number of samples, clusters and variances
+        MatrixXd centers, variances;
+        success = readMatrix(variances,"config/variances.csv", 4);
+        if(success==-1)cout << "variances not read properly" << endl;
+        success = readMatrix(centers, "config/centers.csv", 4);
+        if(success==-1)cout << "centers not read properly" << endl;
+        //TODO: Multiple or one dimensional differentiation
+        unsigned int numberSamples, numberClusters;
+        numberClusters = centers.rows();
+        numberSamples = loadScalar("config/numberSamples.csv");
+        dimension = centers.cols();
+
+
+        inputObservation = Observation(centers, variances, numberSamples, random_seed);
+        success = writeMatrix(inputObservation.assignments, "data/assignments.csv", 4);
+        if(success==-1)cout << "assignments not written properly" << endl;
+
+        writeMatrix(inputObservation.y, "data/y.csv", 4);
+        if(success==-1)cout << "y not written properly" << endl;
+
+        writeMatrix(centers,"data/x.csv", 4);
+        if(success==-1)cout << "x not written properly" << endl;
+        writeMatrix(inputObservation.Y, "data/Y.csv", 4);
+        if(success==-1)cout << "Y Matrix not written properly" << endl;
+
+        cout << "Data created and saved in data folder."<< endl;
+        cout << "Data consists of " <<dimension << "dimensions," << numberClusters << " clusters and " << numberSamples << " samples."<< endl;
+        return 0;
+    }
+    
 
  
-//     Data inputData =  Data(inputObservation, r_z, random_seed);
+    Data inputData =  Data(inputObservation, r_z, random_seed);
 
     
-//     // Create config.csv 
-//     ofstream configData;
-//     configData.open("config.csv",ios::app);
-//     configData << "numberOfIterations" << "," << numberIterations << endl;
-//     configData << "tolerance" << "," << tolerance << endl;
-//     configData << "r_z" << "," << r_z << endl;
-//     configData.close();
+    // Create config.csv 
+    ofstream configData;
+    configData.open("config.csv",ios::app);
+    configData << "numberOfIterations" << "," << numberIterations << endl;
+    configData << "tolerance" << "," << tolerance << endl;
+    configData << "r_z" << "," << r_z << endl;
+    configData << "dimension" << "," << dimension << endl;
+    configData.close();
 
-//     Trainer trainer(numberIterations, tolerance);
-//     trainer.train(inputData);
+    // Trainer trainer(numberIterations, tolerance);
+    // trainer.train(inputData);
     
 
-//     return 0;
+    return 0;
 
-// }
+}
+

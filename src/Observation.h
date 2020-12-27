@@ -14,11 +14,11 @@ class Observation{
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
         unsigned int dimension;
 
-        VectorXd x;
+        MatrixXd x;
 
         VectorXd assignments;
         
-        VectorXd y;
+        MatrixXd y;
         MatrixXd Y;
         
         VectorXd variances;
@@ -26,14 +26,14 @@ class Observation{
 
         default_random_engine generator_observation;
 
-        Observation(VectorXd mean_vector, VectorXd variance_vector, unsigned int numberSamples, unsigned seed);
+        // Observation(VectorXd mean_vector, VectorXd variance_vector, unsigned int numberSamples, unsigned seed);
         Observation(MatrixXd mean_matrix, MatrixXd variance_matrix, unsigned int numberSamples, unsigned seed);
         Observation();
 
         double normalDistribution(double mean, double variance);
         unsigned int uniformDistribution(unsigned int min, unsigned int max);
 
-        void computeObservation(unsigned int numberSamples);
+        // void computeObservation(unsigned int numberSamples);
         void computeObservation(MatrixXd meanMatrix, MatrixXd choleskyMatrices[], unsigned int numberSamples);
 
 };

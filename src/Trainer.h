@@ -26,7 +26,7 @@ class Trainer{
         VectorXd stateX;
 
 
-        Trainer(unsigned int numberIterations, double tol);
+        Trainer(unsigned int numberIterations, double tol, unsigned int dimension);
         void updateX(Data& data);
         void updateSz(Data& data);
         void train(Data& data);

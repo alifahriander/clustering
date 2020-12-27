@@ -6,27 +6,21 @@
 using namespace std;
 
 
-Observation::Observation(VectorXd mean_vector, VectorXd variance_vector, unsigned int numberSamples, unsigned seed){
-    cout << "I'm here" << endl;
-    x = mean_vector;
-    y = VectorXd(numberSamples);
-    assignments = VectorXd(numberSamples);
+// Observation::Observation(VectorXd mean_vector, VectorXd variance_vector, unsigned int numberSamples, unsigned seed){
+//     x = mean_vector;
+//     y = VectorXd(numberSamples);
+//     assignments = VectorXd(numberSamples);
 
-    variances = variance_vector;
+//     variances = variance_vector;
 
-    generator_observation.seed(seed);
+//     generator_observation.seed(seed);
 
-    Observation::computeObservation(numberSamples);
-}
+//     Observation::computeObservation(numberSamples);
+// }
 
 Observation::Observation(MatrixXd mean_matrix, MatrixXd variance_matrix, unsigned int numberSamples, unsigned seed){
     dimension = mean_matrix.cols();
 
-
-    // // Matrix<double,Dynamic,Dynamic,RowMajor> variance(variance_matrix);
-    // // Map<RowVectorXd> variances(variance.data(), variance.size());
-
-    
     Y = MatrixXd(numberSamples,dimension);
     assignments = VectorXd(numberSamples);
 
@@ -83,17 +77,18 @@ unsigned int Observation::uniformDistribution(unsigned int min, unsigned int max
 
 }
 
-void Observation::computeObservation(unsigned int numberSamples){    
-    for(unsigned int i=0; i<numberSamples; ++i){
-        assignments(i) = uniformDistribution(0,x.rows()-1);
-        y(i) = normalDistribution(x(assignments(i)), variances(assignments(i)));
-    }
-}
+// void Observation::computeObservation(unsigned int numberSamples){    
+//     for(unsigned int i=0; i<numberSamples; ++i){
+//         assignments(i) = uniformDistribution(0,x.rows()-1);
+//         y(i) = normalDistribution(x(assignments(i)), variances(assignments(i)));
+//     }
+// }
 
 void Observation::computeObservation(MatrixXd meanMatrix, MatrixXd choleskyMatrices[], unsigned int numberSamples){
     MatrixXd observation(numberSamples,meanMatrix.cols());
+
     for(unsigned int i=0; i<numberSamples; i++){
-        assignments(i) = (int) uniformDistribution(0,1);
+        assignments(i) = (int) uniformDistribution(0,meanMatrix.rows()-1);
         VectorXd normalVector(dimension);
         // normalVector = N(0,I);
         for(unsigned int k=0; k<dimension;++k){
@@ -106,7 +101,8 @@ void Observation::computeObservation(MatrixXd meanMatrix, MatrixXd choleskyMatri
 
     }
     Y = observation;
-    cout << Y << endl;
-
+    Matrix<double,Dynamic,Dynamic,RowMajor> tmpY(Y);
+    Map<RowVectorXd> flatY(tmpY.data(), tmpY.size());
+    y = flatY;
 }
 

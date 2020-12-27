@@ -5,7 +5,7 @@
 using namespace std;
 using namespace Eigen;
 
-Trainer::Trainer(unsigned int inputNumberInterations, double inputTol){
+Trainer::Trainer(unsigned int inputNumberInterations, double inputTol, unsigned int dimension){
     Trainer::numberIterations = inputNumberInterations;
     Trainer::tol = inputTol;
 }

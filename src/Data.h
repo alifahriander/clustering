@@ -18,13 +18,12 @@ class Data{
 
         // Matrix consisting of unit matrix numberSamnumberSamples 
         MatrixXd A;
-        MatrixXd W_x;
-        MatrixXd W_z;
+
 
 
         // Mean value of cluster points 
-        VectorXd x_true;
-        VectorXd x_estimate;
+        MatrixXd x_true;
+        MatrixXd x_estimate;
 
         //y_observed is the observation vector with y_0, y_1, ..., y_N
         VectorXd y_observed;
@@ -40,9 +39,9 @@ class Data{
 
         // For weighted update 
         long double alpha = 0.1;
+        unsigned int dimension;
 
 
-        VectorXd s_x;
         VectorXd s_z;
 
         double costX;

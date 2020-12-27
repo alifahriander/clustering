@@ -3,6 +3,10 @@
 #include "Data.h"
 #include "assert.h"
 #include "Trainer.h"
+#include "util.h"
+#include <vector>
+#include <iostream>
+using namespace std;
 
 Data::Data(Observation inputObservation, double R_z, unsigned random_seed){
     generator_data.seed(random_seed);
@@ -12,23 +16,31 @@ Data::Data(Observation inputObservation, double R_z, unsigned random_seed){
     y_observed = inputObservation.y;
     assignments = inputObservation.assignments;
 
-    int inSuccess = VectorToCSV(x_true, "/home/ander/Documents/git/clustering/x_true.csv", 4);
-    inSuccess = VectorToCSV(y_observed, "/home/ander/Documents/git/clustering/y_observed.csv", 4);
-    inSuccess = VectorToCSV(assignments, "/home/ander/Documents/git/clustering/assignments.csv", 4);
+
+    int inSuccess = writeMatrix(x_true.transpose(), "/home/ander/Documents/git/clustering/x_true.csv", 4);
+    inSuccess = writeMatrix(y_observed.transpose(), "/home/ander/Documents/git/clustering/y_observed.csv", 4);
+    inSuccess = writeMatrix(assignments.transpose(), "/home/ander/Documents/git/clustering/assignments.csv", 4);
 
     numberClusters = x_true.rows();
     numberSamples = y_observed.rows();
+    dimension = x_true.cols();
 
     forwardMessageW = VectorXd(numberClusters);
     forwardMessageEta =VectorXd(numberClusters);
 
     // Prepare y 
-    y = VectorXd(numberSamples*numberClusters);
-    for(unsigned int i=0; i<numberSamples; ++i){
-        for(unsigned int j=0; j<numberClusters; ++j){
-            y(i*numberClusters + j) = y_observed(i); 
+    y = VectorXd(numberSamples*numberClusters*dimension);
+    unsigned int i = 0;
+    vector<double> y_flat;
+
+    while(i < y_observed.rows()){
+        for(unsigned int j=0; j<numberClusters; j++){
+            y_flat.push_back(y_observed(i));
         }
-    }    
+        i++;
+    }
+    y = VectorXd::Map(y_flat.data(), y_flat.size());
+
     
     // Prepare A
     A = MatrixXd(numberSamples*numberClusters, numberClusters);
@@ -41,24 +53,13 @@ Data::Data(Observation inputObservation, double R_z, unsigned random_seed){
     r_z = R_z;
 
     s_z = VectorXd(numberClusters*numberSamples);
-    for(unsigned int i=0; i<numberClusters*numberSamples; ++i){
-        s_z(i) = Data::uniformDistribution(0, 1);
+    for(unsigned int i=0; i<s_z.rows(); ++i){
+        double randomNumber = Data::uniformDistribution(0, 1);
+        s_z(i) = randomNumber * randomNumber + r_z*r_z;
     }
-    s_z = s_z.array().square();
-    
-    // Form W_x and W_z matrices 
-    s_x = VectorXd(numberClusters);
-    W_x = MatrixXd(numberClusters,numberClusters);
-
-
-    W_z = MatrixXd(numberClusters*numberSamples, numberClusters*numberSamples);
-    VectorXd V_z = s_z.array()+ r_z*r_z;
-    VectorXd vectorW_z = V_z.array().inverse();
-    W_z = vectorW_z.asDiagonal();
-
-
     //KMeans++ initialization
     x_estimate = initXEstimate();
+    //TODO: initten sonra flattenla 
     // Prepare z
     z = A*x_estimate - y;
 
@@ -169,57 +170,18 @@ void Data::updateData(){
 }
 
 
-int Data::VectorToCSV(const MatrixXd& inputMatrix, const string& fileName, const streamsize dPrec) {
-	int i;
-    assert( inputMatrix.cols() == 1 );
-
-	ofstream outputData;
-    // Always appends
-	outputData.open(fileName, ios::app);
-	if (!outputData)
-		return -1;
-	outputData.precision(dPrec);
-	for (i = 0; i < inputMatrix.rows(); i++) {
-		outputData << inputMatrix(i);
-        if(i<inputMatrix.rows()-1) outputData << ",";
-        else outputData<<endl;
-	}
-	outputData.close();
-
-	if (!outputData)
-		return -1;
-	return 0;
-}
-int Data::VectorToCSV(const double Scalar, const string& fileName, const streamsize dPrec){
-
-	ofstream outputData;
-    // Always appends
-	outputData.open(fileName, ios::app);
-	if (!outputData)
-		return -1;
-	outputData.precision(dPrec);
-    outputData << Scalar;
-    outputData << endl;
-	outputData.close();
-
-	if (!outputData)
-		return -1;
-	return 0;
-}
-
-
 void Data::saveData(bool init){
-    int success = Data::VectorToCSV(x_estimate,"/home/ander/Documents/git/clustering/x_estimate.csv", 4);
+    int success = writeMatrix(x_estimate.transpose(),"/home/ander/Documents/git/clustering/x_estimate.csv", 4);
     if(success != 0) cout<<"Vector couldn't be saved!"<<endl;
-    success = Data::VectorToCSV(s_x,"/home/ander/Documents/git/clustering/s_x.csv", 4);
+    success = writeMatrix(s_x.transpose(),"/home/ander/Documents/git/clustering/s_x.csv", 4);
     if(success != 0) cout<<"Vector couldn't be saved!"<<endl;
-    success = Data::VectorToCSV(s_z,"/home/ander/Documents/git/clustering/s_z.csv", 4);
+    success = writeMatrix(s_z.transpose(),"/home/ander/Documents/git/clustering/s_z.csv", 4);
     if(success != 0) cout<<"Vector couldn't be saved!"<<endl;
-    success = Data::VectorToCSV(z,"/home/ander/Documents/git/clustering/z.csv", 4);
+    success = writeMatrix(z.transpose(),"/home/ander/Documents/git/clustering/z.csv", 4);
     if(success != 0) cout<<"Vector couldn't be saved!"<<endl;
     if(!init){
-    success = Data::VectorToCSV(costZ,"/home/ander/Documents/git/clustering/costZ.csv", 10);
-    if(success != 0) cout<<"Vector couldn't be saved!"<<endl;
+    // success = writeMatrix((MatrixXd) costZ,"/home/ander/Documents/git/clustering/costZ.csv", 10);
+    // if(success != 0) cout<<"Vector couldn't be saved!"<<endl;
     }
 }
 
