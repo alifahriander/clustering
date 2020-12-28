@@ -26,11 +26,10 @@ class Trainer{
         VectorXd stateX;
 
 
-        Trainer(unsigned int numberIterations, double tol, unsigned int dimension);
+        Trainer(unsigned int numberIterations, double tol);
         void updateX(Data& data);
         void updateSz(Data& data);
         void train(Data& data);
-        // int VectorToCSV(const MatrixXd& inputMatrix, const string& fileName, const streamsize dPrec);
 
 };
 #endif

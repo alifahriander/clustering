@@ -5,7 +5,7 @@
 using namespace std;
 using namespace Eigen;
 
-Trainer::Trainer(unsigned int inputNumberInterations, double inputTol, unsigned int dimension){
+Trainer::Trainer(unsigned int inputNumberInterations, double inputTol){
     Trainer::numberIterations = inputNumberInterations;
     Trainer::tol = inputTol;
 }
@@ -48,9 +48,11 @@ void Trainer::updateSz(Data& data){
 
     //diffZ = Vector(z_i ^2 - r_z^2)
     VectorXd diffZ = data.z.array().pow(2);
-
-    diffZ -= data.r_z * data.r_z * VectorXd::Constant(data.numberClusters*data.numberSamples,1.0);
-
+    cout << "z squared " << endl;
+    diffZ -= data.r_z * data.r_z * VectorXd::Constant(diffZ.rows(),1.0);
+    
+    cout << "diffZ dimension " << diffZ.rows() << endl;
+    cout << "s_z dimension " << data.s_z.rows() << endl;
     for(unsigned int i=0; i<data.numberClusters*data.numberSamples; ++i){
 
         if(diffZ(i) < 0.0) data.s_z(i) = 0;
@@ -69,9 +71,13 @@ void Trainer::train(Data& data){
 
     for(unsigned int counter=0; counter<Trainer::numberIterations; counter++){
         //Save last estimate for convergence condition
+        cout << "Loop begins " << endl;
         Trainer::stateX = data.x_estimate;    
+        cout << "State saved " << endl;
         Trainer::updateSz(data);
+        cout << "S_z update done" << endl;
         Trainer::updateX(data);
+        cout << "x update done " << endl;
         
 
         //If at least one of s_xi is 0, stop the training
@@ -88,7 +94,7 @@ void Trainer::train(Data& data){
         if(stopTraining) break;
 
         data.updateCost(data.z,data.r_z, data.costZ);
-        data.updateData();
+        data.saveData();
 
 
 

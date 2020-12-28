@@ -103,6 +103,6 @@ void Observation::computeObservation(MatrixXd meanMatrix, MatrixXd choleskyMatri
     Y = observation;
     Matrix<double,Dynamic,Dynamic,RowMajor> tmpY(Y);
     Map<RowVectorXd> flatY(tmpY.data(), tmpY.size());
-    y = flatY;
+    y = flatY.transpose();
 }
 

@@ -56,7 +56,7 @@ int main(int argc, char** argv){
 
 
     //Load vectors from CSV
-    MatrixXd x, y, assignments;
+    MatrixXd x, y, Y, assignments;
     Observation inputObservation = Observation();
     unsigned int dimension;
     cout << "CHECKPOINT 1" << endl;
@@ -68,12 +68,16 @@ int main(int argc, char** argv){
         if(success == -1) cout << "Error when reading y.csv" << endl;
         success = readMatrix(assignments, "data/assignments.csv", 4);
         if(success == -1) cout << "Error when reading assignments.csv" << endl;
+        success = readMatrix(Y, "data/Y.csv", 4);
+        if(success == -1) cout << "Error when reading Y.csv" << endl;
 
         cout << "all matrices are read" << endl;
         cout << " y dimensions : "<< y.rows() << "x"<<y.cols()<<endl;
         inputObservation.y = y;
         inputObservation.x = x;
         inputObservation.assignments = assignments;
+        inputObservation.Y = Y;
+
         dimension = x.cols();
         cout << "Dimension: " << dimension << endl;
 
@@ -122,8 +126,8 @@ int main(int argc, char** argv){
     configData << "dimension" << "," << dimension << endl;
     configData.close();
 
-    // Trainer trainer(numberIterations, tolerance);
-    // trainer.train(inputData);
+    Trainer trainer(numberIterations, tolerance);
+    trainer.train(inputData);
     
 
     return 0;

@@ -12,18 +12,19 @@ using namespace Eigen;
 class Data{
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
-
+        // unsigned int numberTrueClusters;
         unsigned int numberClusters;
+        unsigned int numberExtendedSamples;
         unsigned int numberSamples;
 
         // Matrix consisting of unit matrix numberSamnumberSamples 
         MatrixXd A;
-
-
-
         // Mean value of cluster points 
         MatrixXd x_true;
-        MatrixXd x_estimate;
+        Matrix<double,Dynamic,Dynamic,RowMajor> x_estimateMatrix;
+        VectorXd x_estimate;
+        // Samples in a matrix 
+        MatrixXd Y;
 
         //y_observed is the observation vector with y_0, y_1, ..., y_N
         VectorXd y_observed;
@@ -39,9 +40,10 @@ class Data{
 
         // For weighted update 
         long double alpha = 0.1;
+
         unsigned int dimension;
 
-
+        VectorXd s_x;
         VectorXd s_z;
 
         double costX;
@@ -54,18 +56,17 @@ class Data{
         default_random_engine generator_data;
     
         Data(Observation inputObservation, double r_z, unsigned random_seed);
-        void updateW(MatrixXd& W,VectorXd s, double r);
-        void updateData();
         void updateCost(VectorXd v, double r, double& cost);
+
+        void printData();
+        void saveData();
+        
+        Matrix<double,Dynamic,Dynamic,RowMajor> initXEstimate();
+        VectorXd computeDistances(VectorXd center);
+        unsigned int selectFromDistribution(VectorXd distances);
+
         double normalDistribution(double mean, double variance);
         double uniformDistribution(double min, double max);
-        void printData();
-        void saveData(bool init);
-        int VectorToCSV(const MatrixXd& inputMatrix, const string& fileName, const streamsize dPrec);
-        int VectorToCSV(double Scalar, const string& fileName, const streamsize dPrec);
-        VectorXd initXEstimate();
-        VectorXd computeDistances(double center);
-        unsigned int selectFromDistribution(VectorXd distances);
 
 };
 
