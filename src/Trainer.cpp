@@ -8,15 +8,16 @@ using namespace Eigen;
 Trainer::Trainer(unsigned int inputNumberInterations, double inputTol){
     Trainer::numberIterations = inputNumberInterations;
     Trainer::tol = inputTol;
+    
 }
 
 
 /**
  * Update x_estimate
  * */
-void Trainer::updateX(Data& data){  
+void Trainer::updateX(Data& data){ 
     //Update x_estimate with forward and backward Gaussian message
-    for(int k = 0; k<data.numberClusters; k++){
+    for(int k = 0; k<data.numberClusters*data.dimension; k++){
         double w = 0.0;
         double eta = 0.0;
         double tmp = 0.0;
@@ -24,9 +25,9 @@ void Trainer::updateX(Data& data){
         // Backward Message
         for(int i=0;i<data.numberSamples;i++){
             // Consider s_z if it is not equal to zero
-            tmp = data.r_z * data.r_z + data.s_z(i*data.numberClusters + k);
+            tmp = data.r_z * data.r_z + data.s_z(i*data.numberClusters*data.dimension + k);
             w += 1 / tmp ;
-            eta+= (1/tmp) * data.y(i);
+            eta+= (1/tmp) * data.y(k+i*data.numberClusters*data.dimension);
         }
 
         // Forward Message
@@ -40,44 +41,56 @@ void Trainer::updateX(Data& data){
 
     }
     data.z = data.A * data.x_estimate - data.y;
+    
 }
 
 
 void Trainer::updateSz(Data& data){
     
-
     //diffZ = Vector(z_i ^2 - r_z^2)
     VectorXd diffZ = data.z.array().pow(2);
-    cout << "z squared " << endl;
     diffZ -= data.r_z * data.r_z * VectorXd::Constant(diffZ.rows(),1.0);
     
-    cout << "diffZ dimension " << diffZ.rows() << endl;
-    cout << "s_z dimension " << data.s_z.rows() << endl;
     for(unsigned int i=0; i<data.numberClusters*data.numberSamples; ++i){
 
         if(diffZ(i) < 0.0) data.s_z(i) = 0;
         else data.s_z(i) = diffZ(i);
     }
-    
+    if(multiDimension){
+        for(unsigned int i=0; i<data.numberSamples; i++){
+            //Find max 
+            for(unsigned int k=0; k<data.numberClusters; k++){
+                double maxVariance = 0.0;
+
+                for(unsigned int d=0; d<data.dimension; d++){
+                    unsigned int index = i*data.numberClusters*data.dimension + k + d*data.numberClusters;
+                    if(data.s_z(index)>maxVariance) maxVariance = data.s_z(index);
+                }
+                for(unsigned int d=0; d<data.dimension; d++){
+                    unsigned int index = i*data.numberClusters*data.dimension + k + d*data.numberClusters;
+                    data.s_z(index) = maxVariance;
+                }
+                // cout << maxVariance << endl;
+            }
+        }
+    }    
 }
 
 /**
  * Training Loop
  * */
 void Trainer::train(Data& data){
+    if(data.dimension != 1) multiDimension = true;
+    else multiDimension = false;
     
     double diff = 0.0;
     unsigned int noChangeCounter = 0;
 
     for(unsigned int counter=0; counter<Trainer::numberIterations; counter++){
         //Save last estimate for convergence condition
-        cout << "Loop begins " << endl;
         Trainer::stateX = data.x_estimate;    
-        cout << "State saved " << endl;
         Trainer::updateSz(data);
-        cout << "S_z update done" << endl;
         Trainer::updateX(data);
-        cout << "x update done " << endl;
         
 
         //If at least one of s_xi is 0, stop the training

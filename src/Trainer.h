@@ -23,6 +23,7 @@ class Trainer{
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
         unsigned int numberIterations;
         double tol;
+        bool multiDimension;
         VectorXd stateX;
 
 
