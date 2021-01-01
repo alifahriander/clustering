@@ -17,6 +17,7 @@ Trainer::Trainer(unsigned int inputNumberInterations, double inputTol){
  * */
 void Trainer::updateX(Data& data){ 
     //Update x_estimate with forward and backward Gaussian message
+    cout << "Sz vector" << data.s_z << endl;
     for(int k = 0; k<data.numberClusters*data.dimension; k++){
         double w = 0.0;
         double eta = 0.0;
@@ -25,6 +26,7 @@ void Trainer::updateX(Data& data){
         // Backward Message
         for(int i=0;i<data.numberSamples;i++){
             // Consider s_z if it is not equal to zero
+            cout << "s_z_i" << data.s_z(i*data.numberClusters*data.dimension+k) << endl;
             tmp = data.r_z * data.r_z + data.s_z(i*data.numberClusters*data.dimension + k);
             w += 1 / tmp ;
             eta+= (1/tmp) * data.y(k+i*data.numberClusters*data.dimension);
@@ -85,7 +87,7 @@ void Trainer::train(Data& data){
     
     double diff = 0.0;
     unsigned int noChangeCounter = 0;
-
+    numberIterations = 3;
     for(unsigned int counter=0; counter<Trainer::numberIterations; counter++){
         //Save last estimate for convergence condition
         Trainer::stateX = data.x_estimate;    

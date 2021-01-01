@@ -62,7 +62,7 @@ class Data{
         void saveData();
         
         Matrix<double,Dynamic,Dynamic,RowMajor> initXEstimate();
-        VectorXd computeDistances(VectorXd center);
+        VectorXd computeDistances(MatrixXd centers, unsigned int index);
         unsigned int selectFromDistribution(VectorXd distances);
 
         double normalDistribution(double mean, double variance);

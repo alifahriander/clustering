@@ -123,12 +123,10 @@ Matrix<double,Dynamic,Dynamic,RowMajor> Data::initXEstimate(){
     // Step 1 : Select one point from y as cluster center
     centers.row(0) = Y.row((unsigned int)uniformDistribution(0,numberSamples));
     cout << "Center 0:" << centers.row(0) << endl;
-    VectorXd prevCenter = centers.row(0);
     for(unsigned int i = 1; i < numberClusters; i++){
         //Step 2 : Compute distances between 
-        VectorXd distances = computeDistances(prevCenter);
-        prevCenter = Y.row(selectFromDistribution(distances));
-        centers.row(i) = prevCenter;
+        VectorXd distances = computeDistances(centers, i);
+        centers.row(i) = Y.row(selectFromDistribution(distances));
         cout << "Center "<< i << ": " << centers.row(i) << endl;
 
     }
@@ -136,13 +134,19 @@ Matrix<double,Dynamic,Dynamic,RowMajor> Data::initXEstimate(){
 
 }
 
-VectorXd Data::computeDistances(VectorXd center){
-    VectorXd dists(numberSamples);
-    for(unsigned int j=0; j<numberSamples; j++){
-        VectorXd distance = Y.row(j)-center.transpose();
-        dists(j) = distance.squaredNorm();
+VectorXd Data::computeDistances(MatrixXd centers, unsigned int index){
+    MatrixXd dists(numberSamples, index);
+    VectorXd distances(numberSamples);
+    for(unsigned int k=0; k<index; k++){
+        for(unsigned int j=0; j<numberSamples; j++){
+            VectorXd distance = (Y.row(j)-centers.row(k)).transpose();
+            dists(j,k) = distance.squaredNorm();
+        }
     }
-    return dists;
+    for(unsigned int j=0; j<numberSamples; j++){
+        distances(j) = dists.row(j).minCoeff();
+    }
+    return distances;
 
 }
 
