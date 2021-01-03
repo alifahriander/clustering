@@ -32,9 +32,7 @@ Data::Data(Observation inputObservation, double R_z, unsigned random_seed){
     // Prepare variances
     r_z = R_z;
 
-    // cout << "dimension:" << dimension << endl;
-    // cout << "numberExtendedSamples:" << numberExtendedSamples << endl;
-    // cout << "numberSamples:" << numberSamples << endl;
+
 
     // Init forward Gaussian message
     forwardMessageW = VectorXd(numberClusters*dimension);
@@ -52,15 +50,12 @@ Data::Data(Observation inputObservation, double R_z, unsigned random_seed){
         i++;
     }
     y = VectorXd::Map(y_flat.data(), y_flat.size());
-    // cout << "training y:" << endl;
-    // cout << y << endl;
+
     
     //KMeans++ initialization
     Matrix<double,Dynamic,Dynamic,RowMajor> x_estimateMatrix = initXEstimate();
-    // cout << "x_estimateMatrix" << x_estimateMatrix << endl;
     Map<RowVectorXd> tmp(x_estimateMatrix.data(), x_estimateMatrix.size());
     x_estimate = tmp.transpose();
-    // cout << "x_estimate vector:\n" << x_estimate << endl;
 
 
     // Prepare A
@@ -68,10 +63,7 @@ Data::Data(Observation inputObservation, double R_z, unsigned random_seed){
     MatrixXd identity_matrix = MatrixXd::Identity(x_estimate.rows(), x_estimate.rows());
     for(unsigned int i = 0; i<numberSamples; ++i){
         A.block(i*numberClusters*dimension,0,x_estimate.rows(),x_estimate.rows()) = identity_matrix;
-        // cout << "++++++++++++++++" << endl;
-        // cout << A << endl;
     }
-    // cout << "A:" << A << endl;
     // Prepare z
     z = A*x_estimate - y;
 
@@ -85,11 +77,14 @@ Data::Data(Observation inputObservation, double R_z, unsigned random_seed){
     s_x = VectorXd(x_estimate.rows());
 
     Data::saveData();
+    
    
 
 }
 
-
+/**
+ * Compute cost according to SNUV loss function
+ * */
 void Data::updateCost(VectorXd v, double r, double& cost){
     double accumulatedCost = 0.0;
     for(unsigned int i=0; i<v.size(); i++){
@@ -112,12 +107,21 @@ double Data::normalDistribution(double mean, double variance){
     normal_distribution<double> distribution(mean, variance);
     return distribution(generator_data);
 }
+/*
+* Draw sample from uniform distribution
+* @param min
+* @param max
+* @return sample 
+*/
 double Data::uniformDistribution(double min, double_t max){
     uniform_real_distribution<double> distrib(min, max); 
     return distrib(generator_data);
 
 }
 
+/**
+ * Compute K-Means++ initialization 
+ * */
 Matrix<double,Dynamic,Dynamic,RowMajor> Data::initXEstimate(){
     MatrixXd centers(numberClusters, dimension);
     // Step 1 : Select one point from y as cluster center
@@ -133,7 +137,9 @@ Matrix<double,Dynamic,Dynamic,RowMajor> Data::initXEstimate(){
     return centers;
 
 }
-
+/**
+ * Compute distance matrix between all observations in @Y and 0 - (@index -1)th row vector  of @centers 
+ * */
 VectorXd Data::computeDistances(MatrixXd centers, unsigned int index){
     MatrixXd dists(numberSamples, index);
     VectorXd distances(numberSamples);
@@ -150,6 +156,9 @@ VectorXd Data::computeDistances(MatrixXd centers, unsigned int index){
 
 }
 
+/**
+ * Sample an index from the given weighted probability distribution @distances vector 
+ * */
 unsigned int Data::selectFromDistribution(VectorXd distances){
     distances = distances.normalized();
     double randomValue = uniformDistribution(0,1);

@@ -6,17 +6,10 @@
 using namespace std;
 
 
-// Observation::Observation(VectorXd mean_vector, VectorXd variance_vector, unsigned int numberSamples, unsigned seed){
-//     x = mean_vector;
-//     y = VectorXd(numberSamples);
-//     assignments = VectorXd(numberSamples);
+Observation::Observation(){
 
-//     variances = variance_vector;
+}
 
-//     generator_observation.seed(seed);
-
-//     Observation::computeObservation(numberSamples);
-// }
 
 Observation::Observation(MatrixXd mean_matrix, MatrixXd variance_matrix, unsigned int numberSamples, unsigned seed){
     dimension = mean_matrix.cols();
@@ -35,7 +28,7 @@ Observation::Observation(MatrixXd mean_matrix, MatrixXd variance_matrix, unsigne
 
     }
 
-
+    // Compute Cholesky Decomposition
     MatrixXd choleskyMatrices[mean_matrix.rows()];
     for(unsigned int i=0; i<mean_matrix.rows(); ++i){
         LLT<MatrixXd> lltMatrix(covariances[i]);
@@ -50,9 +43,6 @@ Observation::Observation(MatrixXd mean_matrix, MatrixXd variance_matrix, unsigne
 }
 
 
-Observation::Observation(){
-
-}
 
 /*
 * Draw sample from normal distribution
@@ -77,13 +67,13 @@ unsigned int Observation::uniformDistribution(unsigned int min, unsigned int max
 
 }
 
-// void Observation::computeObservation(unsigned int numberSamples){    
-//     for(unsigned int i=0; i<numberSamples; ++i){
-//         assignments(i) = uniformDistribution(0,x.rows()-1);
-//         y(i) = normalDistribution(x(assignments(i)), variances(assignments(i)));
-//     }
-// }
-
+/**
+* Compute Observation for both 1-D and multidimensional case
+* To compute the observation, we first choose from which cluster the observation is sampled by drawing a sample from a uniform distribution at random.
+* (We decompose the corresponding variance matrix to LL^T with Cholesky Decomposition in the initialization function)
+* A new sample is given by m + Lu, where m is a mean vector in the row vectors of @meanMatrix , L is the Cholesky Decomposition in @choleskyMatrices of 
+* Covariance Matrix and u is a vector with the corresponding dimensions that has components samples from the standart normal distribution
+* */
 void Observation::computeObservation(MatrixXd meanMatrix, MatrixXd choleskyMatrices[], unsigned int numberSamples){
     MatrixXd observation(numberSamples,meanMatrix.cols());
 

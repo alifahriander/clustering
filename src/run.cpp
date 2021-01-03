@@ -13,8 +13,13 @@
 
 using namespace std;
 using namespace Eigen;
-unsigned random_seed = std::chrono::system_clock::now().time_since_epoch().count();    
+unsigned random_seed = std::chrono::system_clock::now().time_since_epoch().count(); 
 
+
+/**
+ * Read scalar value from csv file 
+ * @path: Relative path to csv file
+ * */
 double loadScalar(string path){
     double value;
 
@@ -30,7 +35,12 @@ double loadScalar(string path){
     return value;
 }
 
-
+/**
+ * Read parameters from csv file 
+ * @param r_z: allocated variable for r_z
+ * @param numberOfIterations: Parameter to determine maximal number of iterations
+ * @param tolerance: parameter to determine convergence in order to terminate the algorithm
+ * */
 void loadScalars(double& r_z, unsigned int& numberOfIterations, double& tolerance){
     r_z = loadScalar("config/r_z.csv");
     numberOfIterations = (unsigned int) loadScalar("config/numberOfIterations.csv");
@@ -62,6 +72,7 @@ int main(int argc, char** argv){
     cout << "CHECKPOINT 1" << endl;
 
     if(DATA_READY){
+        // If data is already created, read it and initialize corresponding Observation object
         int success = readMatrix(x, "data/x.csv", 4);
         if(success == -1) cout << "Error when reading x.csv" << endl;
         success = readMatrix(y, "data/y.csv", 4);
@@ -82,6 +93,8 @@ int main(int argc, char** argv){
         cout << "Dimension: " << dimension << endl;
 
     }else{
+        //If data is not ready create it with Observation object
+
         // Read config for number of samples, clusters and variances
         MatrixXd centers, variances;
         success = readMatrix(variances,"config/variances.csv", 4);
@@ -108,12 +121,12 @@ int main(int argc, char** argv){
         if(success==-1)cout << "Y Matrix not written properly" << endl;
 
         cout << "Data created and saved in data folder."<< endl;
-        cout << "Data consists of " <<dimension << "dimensions," << numberClusters << " clusters and " << numberSamples << " samples."<< endl;
+        cout << "Data consists of " <<dimension << " dimensions," << numberClusters << " clusters and " << numberSamples << " samples."<< endl;
         return 0;
     }
     
 
- 
+    // Prepare data
     Data inputData =  Data(inputObservation, r_z, random_seed);
 
     
@@ -126,6 +139,7 @@ int main(int argc, char** argv){
     configData << "dimension" << "," << dimension << endl;
     configData.close();
 
+    // Start training
     Trainer trainer(numberIterations, tolerance);
     trainer.train(inputData);
     

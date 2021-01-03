@@ -1,6 +1,12 @@
 #include "util.h"
 using namespace std;
 using namespace Eigen;
+
+/**
+ * 
+ * Write @inputMatrix into a csv file with @fileName with the precision @dPrec
+ * 
+ * **/
 int writeMatrix(const MatrixXd& inputMatrix, const string& fileName, const streamsize dPrec){
     int i, j;
     ofstream outputData;
@@ -21,6 +27,11 @@ int writeMatrix(const MatrixXd& inputMatrix, const string& fileName, const strea
     return 0;
 }
 
+/**
+ * 
+ * Read @inputMatrix from a csv file with @fileName with the precision @dPrec
+ * 
+ * **/
 int readMatrix(MatrixXd& outputMatrix, const string& fileName, const streamsize dPrec){
     ifstream inputData;
     inputData.open(fileName);

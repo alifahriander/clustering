@@ -47,7 +47,7 @@ do
     ./build/clustering 1
     # to create data run ./build/clustering 0
 
-    python3 plot_experiment.py --path .
+    # python3 plot_experiment.py --path .
 
 
     # Find the largest suffix in experiments folder and create a new folder with largest suffix + 1

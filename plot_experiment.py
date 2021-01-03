@@ -1,64 +1,109 @@
-import pandas as pd 
-import matplotlib.pyplot as plt 
-import numpy as np 
-from collections import Counter
 import os 
 import argparse
 import scipy.stats as stats
+import pandas as pd 
+import matplotlib
+import matplotlib.pyplot as plt 
+import numpy as np 
+from collections import Counter
+from matplotlib.pyplot import rcParams
+rcParams['figure.figsize'] = 4.7, 4
+# Save as png for latex 
+# matplotlib.use("png")
+# matplotlib.rcParams.update({
+#     "png.texsystem": "pdflatex",
+#     'font.family': 'serif',
+#     'text.usetex': True,
+#     'png.rcfonts': False,
+# })
 
+# COLORS
+BLUE = "#0000FF"
+RED = "#FF0000"
+GREEN = "#00FF00"
+BLACK = "#000000"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--path", type=str)
 args = parser.parse_args()
 PATH = args.path
+DIRPATH = os.path.dirname(PATH)
 # Read data 
 centers = pd.read_csv(os.path.join(PATH,"x_true.csv"), header=None)
 numberClusters = len(centers.values[0])
+print("numberClusters:", numberClusters)
 
 x = pd.read_csv(os.path.join(PATH,"x_estimate.csv"), header=None)
-s_z = pd.read_csv(os.path.join(PATH,"s_z.csv"), header=None)
+x = x.values[0]
+
 y = pd.read_csv(os.path.join(PATH,"y_observed.csv"), header=None)
-costZ = pd.read_csv(os.path.join(PATH,"costZ.csv"), header=None)
+y = y.values[0]
+
+assignments = pd.read_csv(os.path.join(PATH,"assignments.csv"), header=None)
+assignments = assignments.values[0]
+
+z = pd.read_csv(os.path.join(PATH,"z.csv"), header=None)
+
+s_x = pd.read_csv(os.path.join(PATH,"s_x.csv"), header=None)
+s_z = pd.read_csv(os.path.join(PATH,"s_z.csv"), header=None)
 
 r_z = pd.read_csv(os.path.join(PATH,"config.csv"), header=None, index_col=0).loc["r_z"][1]
-centers = pd.read_csv("experiments/config/centers.csv", header=None).loc[:,0].values
-variances = pd.read_csv("experiments/config/variances.csv", header=None).loc[:,0].values
 
-maximumCenter = np.max(centers)
-minimumCenter = np.min(centers)
+# Convert assignments to colors
+def colorMapping(assignment):
+    if(assignment==0):
+        return BLUE
+    elif(assignment==1):
+        return RED
+    elif(assignment==2):
+        return GREEN
 
-fig, axs = plt.subplots(1,3)
-# axs = axs.ravel()
-fig.suptitle("Experiment: r_z %.4f"%(r_z))
+assignments = list(assignments)
+assignments = list(map(colorMapping, assignments))
 
-#Cluster Center Estimate
-for i in range(numberClusters):
-    axs[0].plot(x.iloc[:,i], label="Estimate Center %i:%.2f"%(i,x.iloc[-1,i]))
-    axs[0].axhline(y=float(centers[i]), color ='k', label="True Center %i: %.2f"%(i,centers[i]))
-axs[0].title.set_text("Cluster Center Estimates (x_estimate)")
-axs[0].set_xlabel("Iterations")
 
-# # Observations 
-y = y.values[0]
-n, _, _ = axs[1].hist(y, bins=100,linewidth=5)
-# Distributions
-margin = 4
-for i in range(numberClusters):
-    xs= np.linspace(centers[i]-variances[i]*margin, centers[i]+variances[i]*margin,100)
-    distrb = stats.norm.pdf(xs, centers[i], variances[i]) 
-    axs[1].plot(xs,distrb*n.max()/distrb.max())
-axs[1].set_xlabel("Value")
-axs[1].title.set_text("Observations")
+# Split s_z for all clusters
+s_z = s_z.values[-1]
+zVariances = [list(s_z[0::2]) , list(s_z[1::2])]
 
-#Cost Functions 
-axs[2].plot(costZ.values[:,0])
-axs[2].set_xlabel("Iterations")
-axs[2].title.set_text("Cost Z")
+# Split z for all clusters 
+z = z.values[-1]
+zSplit = [list(z[0::2]), list(z[1::2])]
 
-plt.subplots_adjust(bottom=0.25,top=0.75)
-
-fig.set_size_inches((11, 8.5), forward=False)
-fig.savefig("./result.png", dpi=500)
+# Plot Histogram of Data and Estimates 
+plt.hist(y, bins=100, linewidth=5, color=BLACK)
+plt.xlabel("Location")
+plt.ylabel("Number of Units")
 # plt.show()
+plt.savefig(os.path.join(PATH,"y.png"))
+plt.clf()
 
+# # Plot Variances 
+plt.bar(range(0,len(s_z)//2),zVariances[0], color=assignments)
+plt.xlabel("Sample Index")
+plt.ylabel("Value")
+# plt.show()
+plt.savefig(os.path.join(PATH,"sz1.png"))
+plt.clf()
 
+plt.bar(range(0,len(s_z)//2),zVariances[1], color = assignments)
+plt.xlabel("Sample Index")
+plt.ylabel("Value")
+# plt.show()
+plt.savefig(os.path.join(PATH,"sz2.png"))
+plt.clf()
+
+# Plot Z 
+plt.bar(range(0,len(zSplit[0])), zSplit[0], color=assignments)
+plt.xlabel("Sample Index")
+plt.ylabel("Value")
+# plt.show()
+plt.savefig(os.path.join(PATH,"z1.png"))
+plt.clf()
+
+plt.bar(range(0,len(zSplit[1])), zSplit[1], color=assignments)
+plt.xlabel("Sample Index")
+plt.ylabel("Value")
+plt.savefig(os.path.join(PATH,"z2.png"))
+# plt.show()
+plt.clf()
