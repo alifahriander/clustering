@@ -3,13 +3,15 @@ import pandas as pd
 import numpy as np 
 
 # Case 1 
-classSize1 = 10000
-classSize2 = 10000
+classSize1 = 100
+classSize2 = 100
 # classSize3 = 100
 sizeObservations = classSize1 + classSize2 #+ classSize3
 
 location1 = -5
-location2 = 5
+location2 = -5
+location3 = 5
+location4 = 5
 # location3 = 6
 
 ### Spikes Even and Uneven

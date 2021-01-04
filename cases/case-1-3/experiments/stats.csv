@@ -1,0 +1,14 @@
+,,score,score,score
+,,mean,min,max
+experiment,r_z,,,
+cases/multipleClusterSpikes/experiments/experiment0,1e-06,0.0,0.0,0.0
+cases/multipleClusterSpikes/experiments/experiment1,1e-05,0.0,0.0,0.0
+cases/multipleClusterSpikes/experiments/experiment2,0.0001,0.0,0.0,0.0
+cases/multipleClusterSpikes/experiments/experiment3,0.001,0.0,0.0,0.0
+cases/multipleClusterSpikes/experiments/experiment4,0.01,0.0,0.0,0.0
+cases/multipleClusterSpikes/experiments/experiment5,0.1,0.002000000000000668,0.002000000000000668,0.002000000000000668
+cases/multipleClusterSpikes/experiments/experiment6,1.0,0.20299999999999968,0.16700000000000004,0.22699999999999945
+cases/multipleClusterSpikes/experiments/experiment7,10.0,3.1499999999999995,3.1499999999999995,3.1499999999999995
+cases/multipleClusterSpikes/experiments/experiment10,10000.0,3.252,3.252,3.252
+cases/multipleClusterSpikes/experiments/experiment8,100.0,3.252,3.252,3.252
+cases/multipleClusterSpikes/experiments/experiment9,1000.0,3.252,3.252,3.252

@@ -71,9 +71,18 @@ z = z.values[-1]
 zSplit = [list(z[0::2]), list(z[1::2])]
 
 # Plot Histogram of Data and Estimates 
-plt.hist(y, bins=100, linewidth=5, color=BLACK)
+n,_,_ = plt.hist(y, bins=100, linewidth=5, color=BLACK)
 plt.xlabel("Location")
 plt.ylabel("Number of Units")
+centers = [-2,2]
+variances = [1.0, 1.0]
+margin = 4
+numberClusters = 2
+colors = [BLUE, RED]
+for i in range(numberClusters):
+    xs= np.linspace(centers[i]-variances[i]*margin, centers[i]+variances[i]*margin,100)
+    distrb = stats.norm.pdf(xs, centers[i], variances[i]) 
+    plt.plot(xs,distrb*n.max()/distrb.max(), color=colors[i])
 # plt.show()
 plt.savefig(os.path.join(PATH,"y.png"))
 plt.clf()

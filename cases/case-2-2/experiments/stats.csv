@@ -1,0 +1,14 @@
+,,score,score,score
+,,mean,min,max
+experiment,r_z,,,
+cases/spikeEvenLargeVariance/experiments/experiment3,0.001,1.5744000000000002,0.3210000000000006,2.779
+cases/spikeEvenLargeVariance/experiments/experiment5,0.1,1.5826,0.7170000000000005,2.595
+cases/spikeEvenLargeVariance/experiments/experiment6,1.0,2.0698000000000003,1.327,3.0140000000000007
+cases/spikeEvenLargeVariance/experiments/experiment4,0.01,2.2816,1.0739999999999998,3.2980000000000005
+cases/spikeEvenLargeVariance/experiments/experiment9,1000.0,2.6866,0.19700000000000006,4.265
+cases/spikeEvenLargeVariance/experiments/experiment7,10.0,2.8248,2.0109999999999992,4.112
+cases/spikeEvenLargeVariance/experiments/experiment2,0.0001,3.0458000000000007,1.1070000000000002,8.929000000000002
+cases/spikeEvenLargeVariance/experiments/experiment10,10000.0,3.0644000000000005,2.17,3.745
+cases/spikeEvenLargeVariance/experiments/experiment8,100.0,3.281,0.8590000000000001,8.073
+cases/spikeEvenLargeVariance/experiments/experiment1,1e-05,3.627600000000001,0.9500000000000002,12.176000000000002
+cases/spikeEvenLargeVariance/experiments/experiment0,1e-06,4.2224,1.1860000000000004,13.354000000000001

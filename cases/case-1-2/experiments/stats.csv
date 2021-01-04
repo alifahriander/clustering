@@ -1,0 +1,14 @@
+,,score,score,score
+,,mean,min,max
+experiment,r_z,,,
+cases/spikesUneven/experiments/experiment0,1e-06,0.0,0.0,0.0
+cases/spikesUneven/experiments/experiment1,1e-05,0.0,0.0,0.0
+cases/spikesUneven/experiments/experiment2,0.0001,0.0,0.0,0.0
+cases/spikesUneven/experiments/experiment3,0.001,0.0,0.0,0.0
+cases/spikesUneven/experiments/experiment4,0.01,0.0,0.0,0.0
+cases/spikesUneven/experiments/experiment5,0.1,0.001000000000000334,0.001000000000000334,0.001000000000000334
+cases/spikesUneven/experiments/experiment6,1.0,0.06599999999999984,0.06599999999999984,0.06599999999999984
+cases/spikesUneven/experiments/experiment10,10000.0,2.7100000000000004,2.7100000000000004,2.7100000000000004
+cases/spikesUneven/experiments/experiment7,10.0,2.7100000000000004,2.7100000000000004,2.7100000000000004
+cases/spikesUneven/experiments/experiment8,100.0,2.7100000000000004,2.7100000000000004,2.7100000000000004
+cases/spikesUneven/experiments/experiment9,1000.0,2.7100000000000004,2.7100000000000004,2.7100000000000004

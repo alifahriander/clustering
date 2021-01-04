@@ -1,0 +1,4 @@
+numberOfIterations,1000
+tolerance,1e-05
+r_z,10000
+dimension,2

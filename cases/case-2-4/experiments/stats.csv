@@ -1,0 +1,14 @@
+,,score,score,score
+,,mean,min,max
+experiment,r_z,,,
+cases/spikesEvenUniformNoise/experiments/experiment0,1e-06,4.157424000000001,0.6960000000000006,8.406000000000002
+cases/spikesEvenUniformNoise/experiments/experiment6,1.0,4.3945799999999995,2.1660000000000004,8.0368
+cases/spikesEvenUniformNoise/experiments/experiment1,1e-05,4.421975999999999,2.085,8.751999999999999
+cases/spikesEvenUniformNoise/experiments/experiment2,0.0001,4.6342,0.9050000000000002,9.232000000000001
+cases/spikesEvenUniformNoise/experiments/experiment4,0.01,5.29688,3.415,7.667999999999999
+cases/spikesEvenUniformNoise/experiments/experiment3,0.001,5.4698,3.252,9.041
+cases/spikesEvenUniformNoise/experiments/experiment10,10000.0,6.317019999999999,4.462,7.888399999999999
+cases/spikesEvenUniformNoise/experiments/experiment8,100.0,6.6737600000000015,5.088,8.4267
+cases/spikesEvenUniformNoise/experiments/experiment5,0.1,6.723000000000001,5.7842,7.790000000000001
+cases/spikesEvenUniformNoise/experiments/experiment7,10.0,7.62179,6.9598,8.480699999999999
+cases/spikesEvenUniformNoise/experiments/experiment9,1000.0,7.853700000000001,6.282400000000001,9.3479

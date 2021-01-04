@@ -1,0 +1,14 @@
+,,score,score,score
+,,mean,min,max
+experiment,r_z,,,
+cases/overlapping/experiments/experiment7,10.0,1.1089,0.3820000000000001,2.1045
+cases/overlapping/experiments/experiment2,0.0001,1.1506,0.14500000000000002,2.164
+cases/overlapping/experiments/experiment9,1000.0,1.7497999999999998,0.355,5.805999999999999
+cases/overlapping/experiments/experiment8,100.0,2.0531599999999997,0.7029999999999998,3.552
+cases/overlapping/experiments/experiment6,1.0,2.21756,0.6659999999999999,6.5028
+cases/overlapping/experiments/experiment0,1e-06,2.59478,1.0079999999999996,5.979
+cases/overlapping/experiments/experiment10,10000.0,2.6344900000000004,0.8880000000000001,5.082
+cases/overlapping/experiments/experiment1,1e-05,2.9226,0.4299999999999997,5.587000000000001
+cases/overlapping/experiments/experiment3,0.001,3.49392,1.921,6.3879
+cases/overlapping/experiments/experiment5,0.1,3.5002399999999994,0.965,6.26
+cases/overlapping/experiments/experiment4,0.01,3.5741,0.657,6.7566
