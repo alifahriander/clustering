@@ -1,2 +1,0 @@
-python compute_scores.py --path experiments
-python plot_scores.py --path experiments/result.csv

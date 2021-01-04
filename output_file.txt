@@ -1,7 +1,0 @@
-r_x
-r_z
-clusterVariance1
-clusterVariance2
-clusterCenter1
-clusterCenter2
-beta
